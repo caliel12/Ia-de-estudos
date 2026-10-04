@@ -10,6 +10,8 @@
   var timerEnvio = null;
   var enviando = false;
   var pendente = false;
+  // Há mudança feita neste navegador que ainda não chegou na conta.
+  var alterado = false;
 
   var $ = function (id) {
     return document.getElementById(id);
@@ -108,12 +110,14 @@
       return;
     }
     enviando = true;
+    alterado = false;
     mostrarSalvo("Salvando…");
     api("dados", "PUT", dadosLocais())
       .then(function () {
         mostrarSalvo("Tudo salvo na sua conta.");
       })
       .catch(function (e) {
+        alterado = true;
         if (e && e.status === 401) {
           emailAtual = "";
           atualizarTela();
@@ -133,6 +137,7 @@
 
   function agendarEnvio() {
     if (!emailAtual) return;
+    alterado = true;
     clearTimeout(timerEnvio);
     timerEnvio = setTimeout(enviar, ESPERA_ENVIO);
   }
@@ -231,13 +236,17 @@
       var botao = this;
       botao.disabled = true;
       clearTimeout(timerEnvio);
-      var antes = emailAtual ? api("dados", "PUT", dadosLocais()).catch(function () {}) : Promise.resolve();
+      // Só envia se houver mudança pendente: uma aba desatualizada não pode apagar o que outro aparelho salvou.
+      var antes = emailAtual && alterado ? api("dados", "PUT", dadosLocais()).catch(function () {}) : Promise.resolve();
       antes
         .then(function () {
           return api("sair", "POST", {});
         })
         .catch(function () {})
         .then(function () {
+          emailAtual = "";
+          clearTimeout(timerEnvio);
+          timerEnvio = null;
           // Em computador compartilhado, ninguém vê a agenda depois que você sai.
           gravarLocal("agenda", null);
           gravarLocal("plano", null);
@@ -276,6 +285,17 @@
 
     document.addEventListener("ia-de-estudos:dados-alterados", agendarEnvio);
     window.addEventListener("pagehide", enviarAntesDeSair);
+    document.addEventListener("visibilitychange", atualizarDaConta);
+  }
+
+  // Ao voltar para a aba, traz o que foi salvo em outro aparelho (se aqui não há nada por enviar).
+  function atualizarDaConta() {
+    if (document.visibilityState !== "visible" || !emailAtual || alterado || enviando) return;
+    api("dados")
+      .then(function (remoto) {
+        if (remoto.atualizadoEm && !alterado) aplicar(remoto);
+      })
+      .catch(function () {});
   }
 
   document.addEventListener("DOMContentLoaded", iniciar);
