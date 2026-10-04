@@ -5,6 +5,7 @@
   "use strict";
 
   const CHAVE_STORAGE = "ia-de-estudos:plano";
+  const CHAVE_PERFIL = "ia-de-estudos:perfil";
   const MS_POR_DIA = 24 * 60 * 60 * 1000;
   const URL_IA = "api/gerar-plano";
   const LIMITE_ARQUIVOS_BYTES = 15 * 1024 * 1024;
@@ -269,9 +270,20 @@
   function salvar(plano) {
     try {
       localStorage.setItem(CHAVE_STORAGE, JSON.stringify(plano));
+      document.dispatchEvent(new CustomEvent("ia-de-estudos:dados-alterados"));
     } catch (e) {
       // localStorage indisponível (ex.: modo privado); o plano só não persiste.
     }
+  }
+
+  function salvarIdade(idade) {
+    if (!idade) return;
+    try {
+      const perfil = JSON.parse(localStorage.getItem(CHAVE_PERFIL)) || {};
+      if (perfil.idade === idade) return;
+      localStorage.setItem(CHAVE_PERFIL, JSON.stringify({ ...perfil, idade }));
+      document.dispatchEvent(new CustomEvent("ia-de-estudos:dados-alterados"));
+    } catch (e) {}
   }
 
   function carregar() {
@@ -428,12 +440,14 @@
           .filter((l) => /^https?:\/\//i.test(l));
         const dataProva = form.dataProva.value;
         const horasPorDia = Number(form.horasPorDia.value);
+        const idade = Math.round(Number(form.idade && form.idade.value)) || null;
+        salvarIdade(idade);
 
         if (!conteudo && binarios.length === 0) {
           throw new Error("Adicione o conteúdo da prova (texto ou arquivo) para montar o plano.");
         }
 
-        const ia = await obterTopicosDaIA({ materia, dataProva, horasPorDia, conteudo, arquivos: binarios });
+        const ia = await obterTopicosDaIA({ materia, dataProva, horasPorDia, idade, conteudo, arquivos: binarios });
         if (!ia.topicos && ia.status === 400) throw new Error(ia.aviso);
         if (!ia.topicos && !conteudo) {
           throw new Error(`Não foi possível ler os arquivos sem a IA (${ia.aviso}). Cole o conteúdo em texto.`);
@@ -464,6 +478,7 @@
     document.getElementById("btn-novo-plano").addEventListener("click", () => {
       try {
         localStorage.removeItem(CHAVE_STORAGE);
+        document.dispatchEvent(new CustomEvent("ia-de-estudos:dados-alterados"));
       } catch (e) {}
       document.getElementById("resultado-plano").hidden = true;
       document.dispatchEvent(new CustomEvent("ia-de-estudos:plano"));

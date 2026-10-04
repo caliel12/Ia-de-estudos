@@ -1,6 +1,7 @@
 // Cloudflare Pages Function: POST /api/perguntar
 // Chat da escola: responde o estudante usando a agenda, o plano de estudos e o vídeo aberto (o Gemini assiste ao vídeo do YouTube).
 import { chamarGemini, json, texto } from "../_lib/gemini.js";
+import { idadeValida, instrucoesDeTom } from "../_lib/tom.js";
 
 const MAX_HISTORICO = 20;
 const MAX_TOPICOS = 20;
@@ -11,8 +12,8 @@ const HORA = /^\d{2}:\d{2}$/;
 const TIPOS_AGENDA = ["Prova", "Lição de casa", "Trabalho", "Outro"];
 const DIAS_SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
 
-const INSTRUCOES = `Você é um assistente escolar paciente que ajuda estudantes brasileiros do ensino fundamental e médio em tudo relacionado à escola: provas, lições de casa, trabalhos, redação, organização dos estudos e dúvidas de qualquer matéria.
-Responda em português do Brasil, de forma clara e didática, em no máximo 3 parágrafos curtos.
+const INSTRUCOES = `Você é um assistente escolar paciente e gente boa que ajuda estudantes brasileiros do ensino fundamental e médio em tudo relacionado à escola: provas, lições de casa, trabalhos, redação, organização dos estudos e dúvidas de qualquer matéria.
+Responda em português do Brasil, de forma clara, em no máximo 3 parágrafos curtos.
 Use texto simples, sem markdown (sem asteriscos, #, tabelas); listas curtas com "- " são permitidas.
 Em lição de casa e trabalhos, não entregue a resposta pronta: oriente passo a passo, explique o raciocínio e deixe o estudante chegar na resposta. Se ele mostrar a resposta dele, confira, diga o que está certo e explique onde errou.
 Em redação, ajude a planejar (tema, tese, argumentos, estrutura) e dê dicas sobre o texto do estudante, sem escrever a redação inteira por ele.
@@ -71,6 +72,7 @@ function validar(dados) {
     agenda: validarAgenda(dados.agenda),
     materia: texto(dados.materia, 200),
     video: URL_VIDEO.test(texto(dados.video, 300)) ? dados.video.trim() : "",
+    idade: idadeValida(dados.idade),
   };
 }
 
@@ -136,9 +138,10 @@ export async function onRequestPost({ request, env }) {
   if (validado.erro) return json({ erro: validado.erro }, 400);
 
   const textoEntrada = montarEntrada(validado);
+  const instrucoes = `${INSTRUCOES}\n\n${instrucoesDeTom(validado.idade)}`;
   if (validado.video) {
     const comVideo = await chamarGemini(env, {
-      system_instruction: INSTRUCOES,
+      system_instruction: instrucoes,
       input: [
         { type: "video", uri: validado.video },
         { type: "text", text: textoEntrada },
@@ -148,7 +151,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   // Sem vídeo (ou o vídeo não pôde ser lido: privado, longo demais ou sem cota): responde só com o texto.
-  const ia = await chamarGemini(env, { system_instruction: INSTRUCOES, input: textoEntrada });
+  const ia = await chamarGemini(env, { system_instruction: instrucoes, input: textoEntrada });
   if (ia.erro) return ia.erro;
   return json({ resposta: ia.texto.trim(), semVideo: Boolean(validado.video) });
 }

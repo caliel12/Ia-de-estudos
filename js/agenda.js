@@ -76,6 +76,7 @@
   function gravarJSON(chave, valor) {
     try {
       localStorage.setItem(chave, JSON.stringify(valor));
+      if (chave === CHAVE) document.dispatchEvent(new CustomEvent("ia-de-estudos:dados-alterados"));
     } catch (e) {
       /* armazenamento cheio ou bloqueado: segue só na memória */
     }

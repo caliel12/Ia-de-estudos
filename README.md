@@ -16,6 +16,19 @@ Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A I
 
 A IA lê os materiais e devolve os tópicos, com resumo, perguntas e respostas e termos de busca de vídeo. O cronograma (datas, revisões, simulado) é calculado no navegador. Se a IA não estiver disponível (por exemplo, abrindo o `index.html` direto do disco), o site usa o **modo local**, que extrai os tópicos do texto colado.
 
+## Jeito de falar da IA
+
+Antes de criar o plano, o site pergunta a **idade** do estudante (fica salva no navegador e na conta). A IA fala de um jeito informal, como um colega mais velho explicando, e ajusta as palavras e os exemplos à idade, tanto no plano quanto no chat. As regras ficam em `functions/_lib/tom.js`.
+
+## Conta (login opcional)
+
+No botão **Entrar** do topo dá para criar uma conta com e-mail e senha. Com ela, a agenda, o plano e a idade ficam salvos no servidor e aparecem em qualquer celular ou computador. Sem entrar, tudo continua funcionando e fica salvo só no navegador.
+
+- No primeiro login, o que já estava no navegador é juntado ao que está na conta. Depois, cada mudança é enviada sozinha (`js/conta.js`).
+- Ao sair, a agenda e o plano são apagados daquele navegador, mas continuam na conta.
+- As senhas são guardadas com PBKDF2 (SHA-256, 100 mil iterações, sal aleatório). A sessão é um cookie `HttpOnly`/`Secure` de 30 dias e só o hash do token fica no servidor. Há limite de tentativas de login (10 a cada 15 minutos por e-mail).
+- Os dados ficam num **Cloudflare KV** ligado ao projeto como `CONTAS`. Ainda não existe "esqueci a senha".
+
 ## Agenda escolar
 
 Na seção **Agenda** dá para anotar provas, lições de casa e trabalhos (tipo, título, matéria, data, hora e observação). A lista fica em ordem de prazo, com rótulos como "Amanhã" ou "Atrasado há 2 dias" e uma faixa de avisos com o que vence em até 3 dias. Tudo fica salvo no navegador (`localStorage`).
@@ -37,12 +50,17 @@ ia-de-estudos/
 │   ├── planejador.js   # Envio dos materiais, cronograma e exibição do plano
 │   ├── agenda.js       # Agenda de provas/lições com lembretes (.ics, Google Agenda, notificações)
 │   ├── estudo.js       # Player do YouTube e chat da escola com a IA
+│   ├── etapas.js       # Plano em 3 passos (idade, matéria e data; materiais; revisar)
+│   ├── conta.js        # Login opcional e envio da agenda/plano para a conta
 │   └── main.js         # Ano dinâmico no rodapé, menu mobile
 ├── sw.js               # Service worker mínimo para as notificações da agenda
 ├── functions/
 │   ├── _lib/
-│   │   └── gemini.js       # Chamada ao Gemini compartilhada (modelos de reserva, erros)
+│   │   ├── gemini.js       # Chamada ao Gemini compartilhada (modelos de reserva, erros)
+│   │   ├── tom.js          # Jeito de falar da IA conforme a idade
+│   │   └── conta.js        # Senhas, sessões e limite de tentativas (KV CONTAS)
 │   └── api/
+│       ├── conta/          # /api/conta/criar, entrar, sair, eu e dados (GET/PUT)
 │       ├── gerar-plano.js  # POST /api/gerar-plano: tópicos, resumos e perguntas a partir dos materiais
 │       └── perguntar.js    # POST /api/perguntar: chat da escola (usa agenda, plano e vídeo)
 └── README.md
@@ -76,14 +94,15 @@ python3 -m http.server 8000   # depois acesse http://localhost:8000
    ```
    GEMINI_API_KEY=sua-chave-aqui
    ```
-3. Rode `npx wrangler pages dev .` e acesse <http://localhost:8788>.
+3. Rode `npx wrangler pages dev . --kv CONTAS` e acesse <http://localhost:8788>. O `--kv CONTAS` cria um KV local para as contas.
 
 ## Publicar (Cloudflare Pages, gratuito)
 
 1. No painel da Cloudflare, vá em **Workers & Pages → Create → Pages → Connect to Git** e escolha este repositório.
 2. Configuração de build: **Framework preset** `None`, **Build command** vazio, **Build output directory** `/`.
 3. Em **Settings → Variables and Secrets**, adicione `GEMINI_API_KEY` como **Secret** (Production e Preview).
-4. Faça um novo deploy. Os arquivos em `functions/api/` viram automaticamente os endpoints `/api/gerar-plano` e `/api/perguntar`.
+4. Em **Settings → Bindings**, crie um **KV namespace** (ex.: `ia-de-estudos-contas`) e ligue como `CONTAS` (Production e Preview). Sem ele, o botão Entrar não aparece.
+5. Faça um novo deploy. Os arquivos em `functions/api/` viram automaticamente os endpoints `/api/gerar-plano` e `/api/perguntar`.
 
 ### Alternativa: publicar pelo terminal (Wrangler)
 
@@ -116,5 +135,7 @@ Variáveis opcionais:
 - [ ] Proteger a função contra abuso (limite por usuário, Turnstile)
 - [ ] Sugerir vídeos específicos (não só buscas no YouTube)
 - [ ] Ajustar o plano conforme o desempenho do estudante nas perguntas
-- [ ] Contas de usuário e vários planos/matérias ao mesmo tempo
+- [x] Contas de usuário (e-mail e senha) com agenda e plano salvos na conta
+- [ ] Recuperar a senha por e-mail ou entrar com Google
+- [ ] Vários planos/matérias ao mesmo tempo
 - [ ] Publicar o site (ex.: GitHub Pages)

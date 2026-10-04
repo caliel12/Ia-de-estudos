@@ -425,6 +425,9 @@ mark {
 }
 
 .form input[type="text"],
+.form input[type="email"],
+.form input[type="password"],
+.form input[type="number"],
 .form input[type="date"],
 .form select,
 .form textarea,
@@ -879,6 +882,60 @@ mark {
 }
 
 /* Responsivo */
+/* Conta */
+.btn-conta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: 999px;
+  background: var(--cor-superficie);
+  color: var(--cor-primaria-escura);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-conta:hover {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria-clara);
+}
+
+.conta-form .btn,
+.conta-enviar {
+  width: 100%;
+}
+
+.conta-trocar {
+  margin: 1rem 0 0;
+  text-align: center;
+  color: var(--cor-texto-suave);
+}
+
+.link-botao {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-primaria);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.conta-logado {
+  padding: 1.75rem;
+}
+
+.conta-logado #conta-status {
+  margin-bottom: 1.25rem;
+}
+
+.conta-sair-dica {
+  margin-top: 0.75rem;
+}
+
 @media (max-width: 860px) {
   .estudo-grid {
     grid-template-columns: 1fr;
@@ -895,8 +952,18 @@ mark {
   }
 
   .header-inner {
-    justify-content: center;
     min-height: 56px;
+  }
+
+  .btn-conta {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-conta .nav-icone {
+    width: 18px;
+    height: 18px;
+    padding: 0;
   }
 
   /* No celular a navegação vira uma barra de abas fixa embaixo. */

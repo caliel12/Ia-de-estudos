@@ -43,6 +43,10 @@
           </li>
         </ul>
       </nav>
+      <a href="#conta" id="btn-conta" class="btn-conta" hidden>
+        <svg class="nav-icone" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        <span class="btn-conta-texto">Entrar</span>
+      </a>
     </div>
   </header>
 
@@ -119,6 +123,12 @@
 
           <fieldset class="etapa" data-etapa="1" data-nome="Sobre a prova">
             <legend class="sr-only">Passo 1: sobre a prova</legend>
+            <div class="form-row">
+              <label for="idade">Quantos anos você tem?</label>
+              <input id="idade" name="idade" type="number" inputmode="numeric" min="5" max="99" placeholder="Ex.: 14" required>
+              <p class="hint">Assim a IA explica do seu jeito.</p>
+            </div>
+
             <div class="form-row">
               <label for="materia">Matéria</label>
               <input id="materia" name="materia" type="text" placeholder="Ex.: Biologia" autocomplete="off" required>
@@ -240,6 +250,37 @@
         </div>
       </div>
     </section>
+
+    <section id="conta" class="tela" aria-labelledby="titulo-conta" hidden>
+      <div class="container container--estreito">
+        <h2 id="titulo-conta">Entrar</h2>
+
+        <div id="conta-entrar">
+          <p class="section-intro">Entre para guardar sua agenda e seu plano na sua conta e ver tudo em qualquer celular ou computador. É opcional: sem entrar, tudo fica salvo só neste navegador.</p>
+          <form id="form-conta" class="form cartao conta-form" novalidate>
+            <div class="form-row">
+              <label for="conta-campo-email">E-mail</label>
+              <input id="conta-campo-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="voce@email.com" required>
+            </div>
+            <div class="form-row">
+              <label for="conta-campo-senha">Senha</label>
+              <input id="conta-campo-senha" name="senha" type="password" autocomplete="current-password" minlength="6" required>
+              <p id="conta-dica-senha" class="hint" hidden>Pelo menos 6 caracteres. Anote num lugar seguro: ainda não dá para recuperar a senha.</p>
+            </div>
+            <p id="conta-erro" class="form-erro" role="alert" hidden></p>
+            <button type="submit" id="btn-conta-enviar" class="btn conta-enviar">Entrar</button>
+            <p class="conta-trocar"><span id="conta-trocar-texto">Ainda não tem conta?</span> <button type="button" id="btn-conta-trocar" class="link-botao">Criar conta</button></p>
+          </form>
+        </div>
+
+        <div id="conta-logado" class="cartao conta-logado" hidden>
+          <p>Você entrou como <strong id="conta-email"></strong>.</p>
+          <p id="conta-status" class="hint" role="status">Sua agenda e seu plano ficam salvos na sua conta.</p>
+          <button type="button" id="btn-conta-sair" class="btn btn--secundario">Sair</button>
+          <p class="hint conta-sair-dica">Ao sair, a agenda e o plano somem deste navegador, mas continuam na sua conta.</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -252,6 +293,7 @@
   <script src="js/agenda.js"></script>
   <script src="js/estudo.js"></script>
   <script src="js/etapas.js"></script>
+  <script src="js/conta.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

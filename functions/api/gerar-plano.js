@@ -4,6 +4,7 @@
 // Variáveis de ambiente: GEMINI_API_KEY (obrigatória), GEMINI_MODEL (opcional).
 
 import { chamarGemini, json, texto } from "../_lib/gemini.js";
+import { idadeValida, instrucoesDeTom } from "../_lib/tom.js";
 
 const LIMITE_BASE64 = 20 * 1024 * 1024;
 const LIMITE_CONTEUDO = 200000;
@@ -55,7 +56,7 @@ const INSTRUCOES = `Você é um tutor que prepara estudantes brasileiros para pr
 A partir dos materiais enviados pelo professor, identifique os tópicos que vão cair na prova,
 na ordem lógica de estudo (do básico ao avançado), com no máximo ${MAX_TOPICOS} tópicos.
 Para cada tópico escreva, em português do Brasil:
-- um resumo didático de 3 a 5 frases baseado nos materiais;
+- um resumo de 3 a 5 frases baseado nos materiais, explicado do jeito descrito abaixo;
 - de 3 a 5 perguntas de revisão no estilo de prova, cada uma com resposta curta e correta;
 - um termo de busca para encontrar uma boa videoaula no YouTube.
 Use prioritariamente o conteúdo dos materiais; complete com conhecimento geral da matéria apenas quando necessário.
@@ -85,12 +86,14 @@ function validar(dados) {
     arquivos,
     dataProva: texto(dados.dataProva, 10),
     horasPorDia: Number(dados.horasPorDia) || 1,
+    idade: idadeValida(dados.idade),
   };
 }
 
-function montarEntrada({ materia, conteudo, arquivos, dataProva, horasPorDia }) {
+function montarEntrada({ materia, conteudo, arquivos, dataProva, horasPorDia, idade }) {
   const pedido = [
     `Matéria: ${materia}`,
+    idade && `Idade do estudante: ${idade} anos`,
     dataProva && `Data da prova: ${dataProva}`,
     `Tempo de estudo por dia: ${horasPorDia} hora(s)`,
     conteudo && `Materiais em texto:\n${conteudo}`,
@@ -132,7 +135,7 @@ export async function onRequestPost({ request, env }) {
   if (validado.erro) return json({ erro: validado.erro }, 400);
 
   const ia = await chamarGemini(env, {
-    system_instruction: INSTRUCOES,
+    system_instruction: `${INSTRUCOES}\n\n${instrucoesDeTom(validado.idade)}`,
     input: montarEntrada(validado),
     response_format: { type: "text", mime_type: "application/json", schema: SCHEMA },
   });

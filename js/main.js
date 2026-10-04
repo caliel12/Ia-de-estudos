@@ -1,4 +1,4 @@
-const TELAS = ["inicio", "agenda", "planejador", "estudar"];
+const TELAS = ["inicio", "agenda", "planejador", "estudar", "conta"];
 const TELA_PADRAO = "inicio";
 
 document.addEventListener("DOMContentLoaded", () => {
