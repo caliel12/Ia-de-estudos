@@ -1,11 +1,14 @@
 // Planejador de estudos.
-// `gerarPlano` monta o plano localmente; no futuro pode ser trocado por uma
-// chamada a uma API de IA que receba os mesmos dados e devolva o mesmo formato.
+// Os tópicos vêm da IA (/api/gerar-plano, Google Gemini) quando disponível, ou
+// são extraídos localmente do texto. O cronograma é sempre montado aqui.
 (function () {
   "use strict";
 
   const CHAVE_STORAGE = "ia-de-estudos:plano";
   const MS_POR_DIA = 24 * 60 * 60 * 1000;
+  const URL_IA = "api/gerar-plano";
+  const LIMITE_ARQUIVOS_BYTES = 15 * 1024 * 1024;
+  const EXTENSOES_TEXTO = /\.(txt|md|markdown)$/i;
 
   function hoje() {
     const d = new Date();
@@ -96,8 +99,8 @@
     return perguntas;
   }
 
-  function linkVideo(materia, assunto) {
-    const busca = `${materia} ${assunto} aula`;
+  function linkVideo(materia, assunto, buscaPronta) {
+    const busca = buscaPronta || `${materia} ${assunto} aula`;
     return {
       titulo: `Vídeos sobre "${assunto}" no YouTube`,
       url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(busca),
@@ -117,14 +120,14 @@
       return {
         topico: topico.titulo,
         minutos,
-        leitura: resumoDoTopico(topico),
-        perguntas: gerarPerguntas(topico, outro),
-        videos: [linkVideo(materia, topico.titulo)],
+        leitura: topico.resumo || resumoDoTopico(topico),
+        perguntas: topico.perguntas && topico.perguntas.length > 0 ? topico.perguntas : gerarPerguntas(topico, outro),
+        videos: [linkVideo(materia, topico.titulo, topico.buscaVideo)],
       };
     });
   }
 
-  function gerarPlano({ materia, dataProva, horasPorDia, conteudo, links }) {
+  function gerarPlano({ materia, dataProva, horasPorDia, conteudo, links, topicosDaIA, origem = "local", aviso = "" }) {
     const inicio = hoje();
     const prova = parseDataLocal(dataProva);
     const diasDisponiveis = Math.round((prova - inicio) / MS_POR_DIA);
@@ -132,7 +135,9 @@
       throw new Error("A data da prova precisa ser a partir de amanhã.");
     }
 
-    const topicos = extrairTopicos(conteudo);
+    const topicos = topicosDaIA && topicosDaIA.length > 0
+      ? topicosDaIA.map((t) => Object.assign({ texto: "" }, t))
+      : extrairTopicos(conteudo);
     if (topicos.length === 0) {
       throw new Error("Adicione o conteúdo da prova (texto ou arquivo) para montar o plano.");
     }
@@ -209,6 +214,8 @@
       links,
       criadoEm: new Date().toISOString(),
       totalTopicos: topicos.length,
+      origem,
+      aviso,
       dias,
       concluidos: [],
     };
@@ -291,6 +298,13 @@
     document.getElementById("plano-resumo").textContent =
       `Prova em ${formatarData(prova)} · ${plano.totalTopicos} tópico(s) · ${plano.dias.length} etapa(s)`;
 
+    const origem = document.getElementById("plano-origem");
+    const comIA = plano.origem === "ia";
+    origem.className = "plano-origem" + (comIA ? " plano-origem--ia" : "");
+    origem.textContent = comIA
+      ? "Gerado com IA (Google Gemini)"
+      : "Gerado no modo local, sem IA" + (plano.aviso ? `: ${plano.aviso}` : "");
+
     lista.replaceChildren();
     plano.dias.forEach((dia, indice) => {
       const concluido = plano.concluidos.includes(indice);
@@ -324,18 +338,56 @@
     container.hidden = false;
   }
 
-  function lerArquivos(arquivos) {
-    return Promise.all(
-      Array.from(arquivos).map(
-        (arquivo) =>
-          new Promise((resolve, reject) => {
-            const leitor = new FileReader();
-            leitor.onload = () => resolve(leitor.result);
-            leitor.onerror = () => reject(new Error(`Não foi possível ler o arquivo ${arquivo.name}.`));
-            leitor.readAsText(arquivo);
-          })
-      )
-    );
+  function lerArquivo(arquivo, comoTexto) {
+    return new Promise((resolve, reject) => {
+      const leitor = new FileReader();
+      leitor.onload = () => resolve(leitor.result);
+      leitor.onerror = () => reject(new Error(`Não foi possível ler o arquivo ${arquivo.name}.`));
+      if (comoTexto) leitor.readAsText(arquivo);
+      else leitor.readAsDataURL(arquivo);
+    });
+  }
+
+  async function lerArquivos(lista) {
+    const textos = [];
+    const binarios = [];
+    let tamanho = 0;
+
+    for (const arquivo of Array.from(lista)) {
+      if (EXTENSOES_TEXTO.test(arquivo.name) || arquivo.type.startsWith("text/")) {
+        textos.push(await lerArquivo(arquivo, true));
+        continue;
+      }
+      tamanho += arquivo.size;
+      if (tamanho > LIMITE_ARQUIVOS_BYTES) {
+        throw new Error("Os arquivos são grandes demais (limite de 15 MB no total).");
+      }
+      const dataUrl = await lerArquivo(arquivo, false);
+      const mimeType = arquivo.type || (/\.pdf$/i.test(arquivo.name) ? "application/pdf" : "");
+      binarios.push({ nome: arquivo.name, mimeType, data: dataUrl.split(",")[1] || "" });
+    }
+
+    return { textos, binarios };
+  }
+
+  async function obterTopicosDaIA(pedido) {
+    let resposta;
+    try {
+      resposta = await fetch(URL_IA, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pedido),
+      });
+    } catch (e) {
+      return { aviso: "IA indisponível (abra o site por um servidor com a função /api)" };
+    }
+
+    const corpo = await resposta.json().catch(() => null);
+    if (resposta.ok && corpo && Array.isArray(corpo.topicos) && corpo.topicos.length > 0) {
+      return { topicos: corpo.topicos };
+    }
+    if (corpo && corpo.erro) return { aviso: corpo.erro, status: resposta.status };
+    return { aviso: "IA indisponível neste servidor" };
   }
 
   function mostrarErro(mensagem) {
@@ -362,26 +414,48 @@
       if (!materia) return mostrarErro("Informe a matéria.");
       if (!form.dataProva.value) return mostrarErro("Escolha a data da prova.");
 
+      const botao = document.getElementById("btn-gerar");
+      botao.disabled = true;
+      botao.textContent = "Gerando plano com IA…";
+
       try {
-        const textosArquivos = await lerArquivos(form.arquivos.files);
-        const conteudo = [form.conteudo.value].concat(textosArquivos).join("\n");
+        const { textos, binarios } = await lerArquivos(form.arquivos.files);
+        const conteudo = [form.conteudo.value].concat(textos).join("\n").trim();
         const links = form.links.value
           .split(/\s+/)
           .map((l) => l.trim())
           .filter((l) => /^https?:\/\//i.test(l));
+        const dataProva = form.dataProva.value;
+        const horasPorDia = Number(form.horasPorDia.value);
+
+        if (!conteudo && binarios.length === 0) {
+          throw new Error("Adicione o conteúdo da prova (texto ou arquivo) para montar o plano.");
+        }
+
+        const ia = await obterTopicosDaIA({ materia, dataProva, horasPorDia, conteudo, arquivos: binarios });
+        if (!ia.topicos && ia.status === 400) throw new Error(ia.aviso);
+        if (!ia.topicos && !conteudo) {
+          throw new Error(`Não foi possível ler os arquivos sem a IA (${ia.aviso}). Cole o conteúdo em texto.`);
+        }
 
         const plano = gerarPlano({
           materia,
-          dataProva: form.dataProva.value,
-          horasPorDia: Number(form.horasPorDia.value),
+          dataProva,
+          horasPorDia,
           conteudo,
           links,
+          topicosDaIA: ia.topicos,
+          origem: ia.topicos ? "ia" : "local",
+          aviso: ia.aviso || "",
         });
         salvar(plano);
         renderPlano(plano);
         document.getElementById("resultado-plano").scrollIntoView({ behavior: "smooth" });
       } catch (erro) {
         mostrarErro(erro.message);
+      } finally {
+        botao.disabled = false;
+        botao.textContent = "Gerar plano";
       }
     });
 

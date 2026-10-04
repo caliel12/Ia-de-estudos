@@ -65,7 +65,7 @@
       <div class="container">
         <h2>Criar plano de estudos</h2>
         <p class="section-intro">
-          Protótipo: o plano é montado no próprio navegador. A geração com IA será integrada nas próximas versões.
+          Os materiais são analisados por IA (Google Gemini). Se a IA não estiver disponível, o plano é montado no modo local, direto no navegador.
         </p>
 
         <form id="form-plano" class="form" novalidate>
@@ -98,9 +98,9 @@
           </div>
 
           <div class="form-row">
-            <label for="arquivos">Arquivos do professor <span class="hint">(.txt ou .md)</span></label>
-            <input id="arquivos" name="arquivos" type="file" accept=".txt,.md,text/plain,text/markdown" multiple>
-            <p class="hint">PDFs e slides serão suportados quando a IA for integrada.</p>
+            <label for="arquivos">Arquivos do professor <span class="hint">(PDF, imagem, .txt ou .md)</span></label>
+            <input id="arquivos" name="arquivos" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md,application/pdf,image/*,text/plain,text/markdown" multiple>
+            <p class="hint">Slides: exporte como PDF. PDFs e imagens são lidos pela IA (até ~15 MB no total).</p>
           </div>
 
           <div class="form-row">
@@ -110,7 +110,7 @@
 
           <p id="form-erro" class="form-erro" role="alert" hidden></p>
 
-          <button type="submit" class="btn">Gerar plano</button>
+          <button type="submit" id="btn-gerar" class="btn">Gerar plano</button>
         </form>
 
         <div id="resultado-plano" class="plano" hidden>
@@ -118,6 +118,7 @@
             <div>
               <h3 id="plano-titulo"></h3>
               <p id="plano-resumo" class="plano-resumo"></p>
+              <p id="plano-origem" class="plano-origem"></p>
             </div>
             <div class="plano-acoes">
               <button type="button" id="btn-imprimir" class="btn btn--secundario">Imprimir</button>
