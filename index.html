@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="IA de Estudos — site dedicado a estudos sobre inteligência artificial.">
+  <meta name="description" content="IA de Estudos — informe a data da prova e os materiais do professor e receba um plano de estudos passo a passo.">
   <title>IA de Estudos</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,9 +17,9 @@
       <nav id="site-nav" class="site-nav" aria-label="Navegação principal">
         <ul>
           <li><a href="#inicio">Início</a></li>
-          <li><a href="#artigos">Artigos</a></li>
-          <li><a href="#tutoriais">Tutoriais</a></li>
-          <li><a href="#recursos">Recursos</a></li>
+          <li><a href="#como-funciona">Como funciona</a></li>
+          <li><a href="#planejador">Criar plano</a></li>
+          <li><a href="#em-breve">Em breve</a></li>
         </ul>
       </nav>
     </div>
@@ -28,50 +28,126 @@
   <main>
     <section id="inicio" class="hero">
       <div class="container">
-        <h1>Bem-vindo ao IA de Estudos</h1>
+        <h1>Estude para a prova com um plano feito para você</h1>
         <p class="lead">
-          Um espaço dedicado a estudos sobre <strong>inteligência artificial</strong>:
-          conceitos fundamentais, aprendizado de máquina, redes neurais, modelos de linguagem
-          e muito mais — tudo organizado para aprender de forma progressiva.
+          O <strong>IA de Estudos</strong> usa inteligência artificial para te ajudar a estudar:
+          escolha a data da sua prova, adicione os materiais que o professor passou e receba
+          um passo a passo com resumos, perguntas e vídeos até o dia da prova.
         </p>
-        <a href="#artigos" class="btn">Começar a explorar</a>
+        <a href="#planejador" class="btn">Criar meu plano de estudos</a>
       </div>
     </section>
 
-    <section id="artigos" class="section">
+    <section id="como-funciona" class="section">
       <div class="container">
-        <h2>Artigos</h2>
-        <p class="section-intro">Textos explicativos sobre temas de IA.</p>
-        <div class="card-grid" data-section="artigos">
-          <article class="card card--placeholder">
-            <h3>Em breve</h3>
-            <p>Os primeiros artigos serão publicados aqui.</p>
-          </article>
+        <h2>Como funciona</h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-num">1</span>
+            <h3>Escolha a data da prova</h3>
+            <p>Diga qual é a matéria, quando é a prova e quanto tempo você tem por dia.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <h3>Adicione os materiais</h3>
+            <p>Cole o conteúdo, envie arquivos de texto ou adicione links que o professor passou.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <h3>Siga o passo a passo</h3>
+            <p>Receba um cronograma dia a dia com leitura, perguntas de revisão e vídeos.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="planejador" class="section section--alt">
+      <div class="container">
+        <h2>Criar plano de estudos</h2>
+        <p class="section-intro">
+          Protótipo: o plano é montado no próprio navegador. A geração com IA será integrada nas próximas versões.
+        </p>
+
+        <form id="form-plano" class="form" novalidate>
+          <div class="form-row">
+            <label for="materia">Matéria</label>
+            <input id="materia" name="materia" type="text" placeholder="Ex.: Biologia" required>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="data-prova">Data da prova</label>
+              <input id="data-prova" name="dataProva" type="date" required>
+            </div>
+            <div class="form-row">
+              <label for="horas-dia">Tempo por dia</label>
+              <select id="horas-dia" name="horasPorDia">
+                <option value="0.5">30 minutos</option>
+                <option value="1" selected>1 hora</option>
+                <option value="2">2 horas</option>
+                <option value="3">3 horas</option>
+                <option value="4">4 horas ou mais</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="conteudo">Conteúdo da prova</label>
+            <textarea id="conteudo" name="conteudo" rows="8"
+              placeholder="Cole aqui os tópicos ou o texto do material. Dica: um tópico por linha, ou use títulos (# Título) seguidos do texto."></textarea>
+          </div>
+
+          <div class="form-row">
+            <label for="arquivos">Arquivos do professor <span class="hint">(.txt ou .md)</span></label>
+            <input id="arquivos" name="arquivos" type="file" accept=".txt,.md,text/plain,text/markdown" multiple>
+            <p class="hint">PDFs e slides serão suportados quando a IA for integrada.</p>
+          </div>
+
+          <div class="form-row">
+            <label for="links">Links (vídeos, artigos, slides)</label>
+            <textarea id="links" name="links" rows="3" placeholder="Um link por linha"></textarea>
+          </div>
+
+          <p id="form-erro" class="form-erro" role="alert" hidden></p>
+
+          <button type="submit" class="btn">Gerar plano</button>
+        </form>
+
+        <div id="resultado-plano" class="plano" hidden>
+          <div class="plano-cabecalho">
+            <div>
+              <h3 id="plano-titulo"></h3>
+              <p id="plano-resumo" class="plano-resumo"></p>
+            </div>
+            <div class="plano-acoes">
+              <button type="button" id="btn-imprimir" class="btn btn--secundario">Imprimir</button>
+              <button type="button" id="btn-novo-plano" class="btn btn--secundario">Novo plano</button>
+            </div>
+          </div>
+          <div class="progresso" aria-label="Progresso do plano">
+            <div id="progresso-barra" class="progresso-barra"></div>
+          </div>
+          <p id="progresso-texto" class="progresso-texto"></p>
+          <ol id="plano-dias" class="plano-dias"></ol>
         </div>
       </div>
     </section>
 
-    <section id="tutoriais" class="section section--alt">
+    <section id="em-breve" class="section">
       <div class="container">
-        <h2>Tutoriais</h2>
-        <p class="section-intro">Guias práticos, passo a passo.</p>
-        <div class="card-grid" data-section="tutoriais">
+        <h2>Em breve</h2>
+        <div class="card-grid">
           <article class="card card--placeholder">
-            <h3>Em breve</h3>
-            <p>Tutoriais práticos estão a caminho.</p>
+            <h3>IA de verdade</h3>
+            <p>Leitura de PDFs e slides, resumos e perguntas geradas por um modelo de linguagem.</p>
           </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="recursos" class="section">
-      <div class="container">
-        <h2>Recursos</h2>
-        <p class="section-intro">Livros, cursos, ferramentas e links úteis.</p>
-        <div class="card-grid" data-section="recursos">
           <article class="card card--placeholder">
-            <h3>Em breve</h3>
-            <p>Uma curadoria de recursos será adicionada aqui.</p>
+            <h3>Simulados</h3>
+            <p>Questões de múltipla escolha com correção e explicação.</p>
+          </article>
+          <article class="card card--placeholder">
+            <h3>Artigos e tutoriais</h3>
+            <p>Conteúdos sobre técnicas de estudo e sobre inteligência artificial.</p>
           </article>
         </div>
       </div>
@@ -84,6 +160,7 @@
     </div>
   </footer>
 
+  <script src="js/planejador.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

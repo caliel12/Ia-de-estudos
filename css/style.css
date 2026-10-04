@@ -234,3 +234,287 @@ a {
     padding: 3.5rem 0 3rem;
   }
 }
+
+/* Como funciona */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.step {
+  padding: 1.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0.75rem;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: #fff;
+  font-weight: 700;
+}
+
+.step p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+/* Formulário */
+.form {
+  max-width: 720px;
+  padding: 1.5rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-fundo);
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form label {
+  font-weight: 600;
+}
+
+.form input[type="text"],
+.form input[type="date"],
+.form select,
+.form textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+}
+
+.form textarea {
+  resize: vertical;
+}
+
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 1px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--cor-texto-suave);
+}
+
+.form-erro {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.btn {
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn--secundario {
+  padding: 0.5rem 1rem;
+  background: var(--cor-fundo);
+  color: var(--cor-primaria);
+  border: 1px solid var(--cor-primaria);
+}
+
+.btn--secundario:hover,
+.btn--secundario:focus-visible {
+  background: #eef2ff;
+}
+
+/* Plano */
+.plano {
+  margin-top: 2rem;
+}
+
+.plano-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.plano-resumo {
+  color: var(--cor-texto-suave);
+}
+
+.plano-acoes {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.progresso {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--cor-borda);
+  overflow: hidden;
+}
+
+.progresso-barra {
+  width: 0;
+  height: 100%;
+  background: var(--cor-primaria);
+  transition: width 0.3s;
+}
+
+.progresso-texto {
+  margin: 0.5rem 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+}
+
+.plano-dias {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dia {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--cor-borda);
+  border-left: 4px solid var(--cor-primaria);
+  border-radius: var(--raio);
+  background: var(--cor-fundo);
+}
+
+.dia--revisao {
+  border-left-color: #f59e0b;
+}
+
+.dia--prova {
+  border-left-color: #10b981;
+}
+
+.dia--concluido {
+  opacity: 0.6;
+}
+
+.dia-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dia-data {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--cor-texto-suave);
+}
+
+.dia h4 {
+  margin: 0.15rem 0 0;
+  font-size: 1.1rem;
+}
+
+.dia-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tarefa {
+  margin-top: 0.9rem;
+}
+
+.tarefa h5 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.tarefa p,
+.tarefa ul {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.tarefa ul {
+  padding-left: 1.25rem;
+}
+
+.tarefa li {
+  margin-bottom: 0.35rem;
+}
+
+.tarefa details summary {
+  cursor: pointer;
+  color: var(--cor-texto);
+}
+
+.tarefa details p {
+  margin: 0.25rem 0 0;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form {
+    padding: 1.25rem;
+  }
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .hero,
+  #como-funciona,
+  #em-breve,
+  .form,
+  .section-intro,
+  .plano-acoes,
+  .dia-check {
+    display: none !important;
+  }
+
+  .section--alt {
+    background: none;
+  }
+
+  .dia {
+    break-inside: avoid;
+  }
+}

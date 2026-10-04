@@ -27,6 +27,3 @@ function configurarMenuMobile() {
     });
   });
 }
-
-// Espaço reservado para interatividade futura (ex.: carregar artigos de um JSON,
-// busca, filtros por tema, modo escuro).
