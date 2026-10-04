@@ -215,6 +215,11 @@ mark {
   color: var(--cor-texto-suave);
 }
 
+/* O js/agenda.js acrescenta a agenda ao container (classe .agenda) sem apagar o aviso. */
+#agenda-app.agenda > .carregando {
+  display: none;
+}
+
 /* Início */
 .atalhos {
   display: flex;
