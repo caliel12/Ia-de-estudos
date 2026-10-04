@@ -4,6 +4,8 @@ Assistente de estudos para provas. O estudante informa a **data da prova** e os 
 
 Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A IA é o **Google Gemini** (plano gratuito), chamada por uma função serverless da **Cloudflare Pages** (também gratuita) que guarda a chave da API fora do navegador.
 
+**Site no ar:** <https://ia-de-estudos.pages.dev>
+
 ## Como funciona
 
 1. **Escolha a data da prova**: matéria, data e quanto tempo você tem por dia.
@@ -69,6 +71,18 @@ python3 -m http.server 8000   # depois acesse http://localhost:8000
 2. Configuração de build: **Framework preset** `None`, **Build command** vazio, **Build output directory** `/`.
 3. Em **Settings → Variables and Secrets**, adicione `GEMINI_API_KEY` como **Secret** (Production e Preview).
 4. Faça um novo deploy. Os arquivos em `functions/api/` viram automaticamente os endpoints `/api/gerar-plano` e `/api/perguntar`.
+
+### Alternativa: publicar pelo terminal (Wrangler)
+
+Sem conectar o Git, dá para publicar direto com um token da Cloudflare (`CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` no ambiente). Copie só os arquivos do site para uma pasta separada, para não publicar o `.dev.vars`:
+
+```bash
+mkdir -p deploy/public && cp -r index.html css js deploy/public/ && cp -r functions deploy/
+cd deploy
+npx wrangler pages project create ia-de-estudos --production-branch main   # só na primeira vez
+npx wrangler pages secret put GEMINI_API_KEY --project-name ia-de-estudos     # só na primeira vez
+npx wrangler pages deploy public --project-name ia-de-estudos --branch main
+```
 
 Variáveis opcionais:
 
