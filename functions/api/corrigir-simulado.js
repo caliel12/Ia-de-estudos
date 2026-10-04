@@ -4,7 +4,7 @@
 import { chamarGemini, json, texto } from "../_lib/gemini.js";
 import { lerJSON } from "../_lib/conta.js";
 import { idadeValida, instrucoesDeTom } from "../_lib/tom.js";
-import { MAX_QUESTOES, normalizarQuestoes, pedidoGrandeDemais, tipoDeSimulado } from "../_lib/simulado.js";
+import { MAX_QUESTOES, casarTopico, normalizarQuestoes, pedidoGrandeDemais, tipoDeSimulado } from "../_lib/simulado.js";
 
 const NOTAS_DISCURSIVA = [0, 0.5, 1];
 
@@ -44,7 +44,7 @@ const SCHEMA = {
       items: {
         type: "object",
         properties: {
-          topico: { type: "string", description: "Título do tópico, igual ao das questões." },
+          topico: { type: "string", description: "Só o título do tópico, copiado exatamente do campo tópico das questões." },
           oQueFazer: { type: "string", description: "O que revisar e como, em 1 ou 2 frases." },
         },
         required: ["topico", "oQueFazer"],
@@ -114,6 +114,7 @@ function montarEntrada({ tipo, materia, questoes }) {
 }
 
 function montarResultado(questoes, ia) {
+  const titulos = [...new Set(questoes.map((q) => q.topico).filter(Boolean))];
   const discursivas = new Map();
   (Array.isArray(ia.discursivas) ? ia.discursivas : []).forEach((d) => {
     const numero = Number(d && d.numero);
@@ -142,11 +143,22 @@ function montarResultado(questoes, ia) {
     pontosFortes: (Array.isArray(ia.pontosFortes) ? ia.pontosFortes : []).slice(0, 5).map((p) => texto(p, 300)).filter(Boolean),
     erros,
     discursivas: [...discursivas.values()],
-    revisar: (Array.isArray(ia.revisar) ? ia.revisar : [])
-      .slice(0, 10)
-      .map((r) => ({ topico: texto(r && r.topico, 120), oQueFazer: texto(r && r.oQueFazer, 600) }))
-      .filter((r) => r.topico || r.oQueFazer),
+    revisar: juntarRevisar(ia.revisar, titulos),
   };
+}
+
+// Depois de casar os tópicos, itens repetidos do mesmo tópico viram um só.
+function juntarRevisar(lista, titulos) {
+  const itens = [];
+  (Array.isArray(lista) ? lista : []).slice(0, 10).forEach((r) => {
+    const topico = casarTopico(r && r.topico, titulos);
+    const oQueFazer = texto(r && r.oQueFazer, 600);
+    if (!topico && !oQueFazer) return;
+    const igual = topico && itens.find((i) => i.topico === topico);
+    if (!igual) itens.push({ topico, oQueFazer });
+    else if (oQueFazer && !igual.oQueFazer.includes(oQueFazer)) igual.oQueFazer = `${igual.oQueFazer} ${oQueFazer}`.trim().slice(0, 600);
+  });
+  return itens;
 }
 
 export async function onRequestPost({ request, env }) {
