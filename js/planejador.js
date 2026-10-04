@@ -336,6 +336,7 @@
 
     atualizarProgresso(plano);
     container.hidden = false;
+    document.dispatchEvent(new CustomEvent("ia-de-estudos:plano"));
   }
 
   function lerArquivo(arquivo, comoTexto) {
@@ -465,6 +466,7 @@
         localStorage.removeItem(CHAVE_STORAGE);
       } catch (e) {}
       document.getElementById("resultado-plano").hidden = true;
+      document.dispatchEvent(new CustomEvent("ia-de-estudos:plano"));
       form.reset();
       form.scrollIntoView({ behavior: "smooth" });
     });

@@ -19,6 +19,7 @@
           <li><a href="#inicio">Início</a></li>
           <li><a href="#como-funciona">Como funciona</a></li>
           <li><a href="#planejador">Criar plano</a></li>
+          <li><a href="#estudar">Estudar com vídeo</a></li>
           <li><a href="#em-breve">Em breve</a></li>
         </ul>
       </nav>
@@ -123,6 +124,7 @@
             <div class="plano-acoes">
               <button type="button" id="btn-imprimir" class="btn btn--secundario">Imprimir</button>
               <button type="button" id="btn-novo-plano" class="btn btn--secundario">Novo plano</button>
+              <a href="#estudar" class="btn btn--secundario">Estudar com vídeo</a>
             </div>
           </div>
           <div class="progresso" aria-label="Progresso do plano">
@@ -134,13 +136,51 @@
       </div>
     </section>
 
-    <section id="em-breve" class="section">
+    <section id="estudar" class="section">
+      <div class="container">
+        <h2>Estudar com vídeo</h2>
+        <p class="section-intro">
+          Assista a uma videoaula do YouTube e tire suas dúvidas com a IA ao mesmo tempo. A IA usa os tópicos do seu plano para responder.
+        </p>
+
+        <div class="estudo-grid">
+          <div class="estudo-video">
+            <form id="form-video" class="estudo-busca">
+              <label for="video-url" class="sr-only">Link ou busca do YouTube</label>
+              <input id="video-url" type="text" placeholder="Cole um link do YouTube ou digite o que quer buscar">
+              <button type="submit" class="btn">Abrir</button>
+            </form>
+            <p id="video-aviso" class="hint" role="status"></p>
+            <div id="video-player" class="video-player">
+              <p class="video-vazio">Nenhum vídeo aberto ainda.</p>
+            </div>
+            <h3 class="estudo-subtitulo">Videoaulas por tópico do plano</h3>
+            <ul id="estudo-sugestoes" class="chips"></ul>
+          </div>
+
+          <div class="chat">
+            <div class="chat-topo">
+              <h3>Pergunte à IA</h3>
+              <button type="button" id="btn-limpar-chat" class="btn btn--secundario btn--pequeno">Limpar</button>
+            </div>
+            <div id="chat-mensagens" class="chat-mensagens" aria-live="polite"></div>
+            <form id="form-chat" class="chat-form">
+              <label for="chat-pergunta" class="sr-only">Sua pergunta</label>
+              <textarea id="chat-pergunta" rows="2" placeholder="Ex.: Não entendi a diferença entre mitose e meiose"></textarea>
+              <button type="submit" id="btn-enviar-chat" class="btn">Enviar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="em-breve" class="section section--alt">
       <div class="container">
         <h2>Em breve</h2>
         <div class="card-grid">
           <article class="card card--placeholder">
-            <h3>IA de verdade</h3>
-            <p>Leitura de PDFs e slides, resumos e perguntas geradas por um modelo de linguagem.</p>
+            <h3>Flashcards</h3>
+            <p>Cartões de memorização gerados a partir do seu plano.</p>
           </article>
           <article class="card card--placeholder">
             <h3>Simulados</h3>
@@ -162,6 +202,7 @@
   </footer>
 
   <script src="js/planejador.js"></script>
+  <script src="js/estudo.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

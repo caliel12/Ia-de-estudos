@@ -9,6 +9,7 @@ Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A I
 1. **Escolha a data da prova**: matéria, data e quanto tempo você tem por dia.
 2. **Adicione os materiais**: cole o conteúdo, envie PDFs (slides exportados em PDF), imagens, arquivos `.txt`/`.md` ou adicione links.
 3. **Siga o plano**: um cronograma dia a dia com leitura, perguntas, vídeos, revisões espaçadas, um simulado na véspera e o progresso salvo no navegador.
+4. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site e tire dúvidas num chat com a IA, que usa os tópicos do seu plano como contexto.
 
 A IA lê os materiais e devolve os tópicos, com resumo, perguntas e respostas e termos de busca de vídeo. O cronograma (datas, revisões, simulado) é calculado no navegador. Se a IA não estiver disponível (por exemplo, abrindo o `index.html` direto do disco), o site usa o **modo local**, que extrai os tópicos do texto colado.
 
@@ -21,10 +22,14 @@ ia-de-estudos/
 │   └── style.css       # Estilos (layout responsivo, tipografia, header/footer, impressão)
 ├── js/
 │   ├── planejador.js   # Envio dos materiais, cronograma e exibição do plano
+│   ├── estudo.js       # Player do YouTube e chat de dúvidas com a IA
 │   └── main.js         # Ano dinâmico no rodapé, menu mobile
 ├── functions/
+│   ├── _lib/
+│   │   └── gemini.js       # Chamada ao Gemini compartilhada (modelos de reserva, erros)
 │   └── api/
-│       └── gerar-plano.js  # Cloudflare Pages Function: chama o Gemini (POST /api/gerar-plano)
+│       ├── gerar-plano.js  # POST /api/gerar-plano: tópicos, resumos e perguntas a partir dos materiais
+│       └── perguntar.js    # POST /api/perguntar: chat de dúvidas
 └── README.md
 ```
 
@@ -63,7 +68,7 @@ python3 -m http.server 8000   # depois acesse http://localhost:8000
 1. No painel da Cloudflare, vá em **Workers & Pages → Create → Pages → Connect to Git** e escolha este repositório.
 2. Configuração de build: **Framework preset** `None`, **Build command** vazio, **Build output directory** `/`.
 3. Em **Settings → Variables and Secrets**, adicione `GEMINI_API_KEY` como **Secret** (Production e Preview).
-4. Faça um novo deploy. A função em `functions/api/gerar-plano.js` vira automaticamente o endpoint `/api/gerar-plano`.
+4. Faça um novo deploy. Os arquivos em `functions/api/` viram automaticamente os endpoints `/api/gerar-plano` e `/api/perguntar`.
 
 Variáveis opcionais:
 
@@ -71,7 +76,7 @@ Variáveis opcionais:
 | --- | --- | --- |
 | `GEMINI_MODEL` | `gemini-3.8-flash` | Trocar o modelo (ex.: `gemini-3.5-flash-lite` para limites maiores) |
 
-**Atenção ao plano gratuito do Gemini:** ele tem limite de requisições e às vezes fica sobrecarregado. Nesses casos a função tenta automaticamente os modelos de reserva (`gemini-3.5-flash` e `gemini-3.5-flash-lite`); se todos falharem, o site mostra um aviso e volta ao modo local, e o Google pode usar o conteúdo enviado para melhorar seus produtos. Não ative cobrança no projeto da chave se quiser garantir custo zero.
+**Atenção ao plano gratuito do Gemini:** ele tem limite de requisições e às vezes fica sobrecarregado. Nesses casos a função tenta automaticamente os modelos de reserva (`gemini-3.5-flash` e `gemini-3.5-flash-lite`); se todos falharem, o site mostra um aviso e volta ao modo local. Além disso, o Google pode usar o conteúdo enviado para melhorar seus produtos. Não ative cobrança no projeto da chave se quiser garantir custo zero.
 
 ## Roadmap
 
@@ -79,6 +84,7 @@ Variáveis opcionais:
 - [x] Integrar uma IA (Google Gemini) via função serverless, sem expor a chave no navegador
 - [x] Ler PDFs e imagens dos materiais do professor
 - [x] Gerar resumos e perguntas com resposta por tópico
+- [x] Assistir vídeos do YouTube no site com chat de dúvidas com a IA
 - [ ] Flashcards e questões de múltipla escolha com correção e explicação
 - [ ] Proteger a função contra abuso (limite por usuário, Turnstile)
 - [ ] Sugerir vídeos específicos (não só buscas no YouTube)
