@@ -3,115 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="IA de Estudos — informe a data da prova e os materiais do professor e receba um plano de estudos passo a passo.">
-  <title>IA de Estudos</title>
+  <meta name="description" content="IA de Estudos — seu assistente para provas, lições e trabalhos. Organize a agenda da escola, monte um plano de estudos e tire dúvidas com a IA.">
+  <title>IA de Estudos — seu assistente para provas, lições e trabalhos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#inicio" class="logo">IA de Estudos</a>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menu">
-        <span></span><span></span><span></span>
-      </button>
-      <nav id="site-nav" class="site-nav" aria-label="Navegação principal">
+      <a href="#inicio" class="logo"><span class="logo-marca" aria-hidden="true">✎</span> IA de Estudos</a>
+      <nav class="site-nav" aria-label="Navegação principal">
         <ul>
-          <li><a href="#inicio">Início</a></li>
-          <li><a href="#como-funciona">Como funciona</a></li>
-          <li><a href="#planejador">Criar plano</a></li>
-          <li><a href="#estudar">Estudar com vídeo</a></li>
-          <li><a href="#em-breve">Em breve</a></li>
+          <li>
+            <a href="#inicio" data-tela="inicio">
+              <svg class="nav-icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+              <span>Início</span>
+            </a>
+          </li>
+          <li>
+            <a href="#agenda" data-tela="agenda">
+              <svg class="nav-icone" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              <span>Agenda</span>
+            </a>
+          </li>
+          <li>
+            <a href="#planejador" data-tela="planejador">
+              <svg class="nav-icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>
+              <span>Criar plano</span>
+            </a>
+          </li>
+          <li>
+            <a href="#estudar" data-tela="estudar">
+              <svg class="nav-icone" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9l5 3-5 3z"/></svg>
+              <span>Estudar<span class="nav-rotulo-extra"> com vídeo</span></span>
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
   </header>
 
   <main>
-    <section id="inicio" class="hero">
-      <div class="container">
-        <h1>Estude para a prova com um plano feito para você</h1>
+    <section id="inicio" class="tela" aria-labelledby="titulo-inicio">
+      <div class="container container--estreito">
+        <h1 id="titulo-inicio">O que vamos estudar <mark>hoje</mark>?</h1>
         <p class="lead">
-          O <strong>IA de Estudos</strong> usa inteligência artificial para te ajudar a estudar:
-          escolha a data da sua prova, adicione os materiais que o professor passou e receba
-          um passo a passo com resumos, perguntas e vídeos até o dia da prova.
+          O IA de Estudos te ajuda com tudo da escola: <strong>provas</strong>, <strong>lições de casa</strong> e <strong>trabalhos</strong>.
+          Escolha por onde começar.
         </p>
-        <a href="#planejador" class="btn">Criar meu plano de estudos</a>
-      </div>
-    </section>
 
-    <section id="como-funciona" class="section">
-      <div class="container">
-        <h2>Como funciona</h2>
-        <ol class="steps">
-          <li class="step">
-            <span class="step-num">1</span>
-            <h3>Escolha a data da prova</h3>
-            <p>Diga qual é a matéria, quando é a prova e quanto tempo você tem por dia.</p>
-          </li>
-          <li class="step">
-            <span class="step-num">2</span>
-            <h3>Adicione os materiais</h3>
-            <p>Cole o conteúdo, envie arquivos de texto ou adicione links que o professor passou.</p>
-          </li>
-          <li class="step">
-            <span class="step-num">3</span>
-            <h3>Siga o passo a passo</h3>
-            <p>Receba um cronograma dia a dia com leitura, perguntas de revisão e vídeos.</p>
-          </li>
+        <div class="atalhos">
+          <a href="#agenda" class="atalho">
+            <span class="atalho-icone" aria-hidden="true"><svg class="atalho-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+            <span class="atalho-texto">
+              <span class="atalho-titulo">Agenda</span>
+              <span class="atalho-desc">Anote provas e lições e receba avisos</span>
+            </span>
+            <span class="atalho-seta" aria-hidden="true">→</span>
+          </a>
+          <a href="#planejador" class="atalho">
+            <span class="atalho-icone" aria-hidden="true"><svg class="atalho-svg" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></span>
+            <span class="atalho-texto">
+              <span class="atalho-titulo">Criar plano</span>
+              <span class="atalho-desc">Monte um passo a passo até a prova</span>
+            </span>
+            <span class="atalho-seta" aria-hidden="true">→</span>
+          </a>
+          <a href="#estudar" class="atalho">
+            <span class="atalho-icone" aria-hidden="true"><svg class="atalho-svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9l5 3-5 3z"/></svg></span>
+            <span class="atalho-texto">
+              <span class="atalho-titulo">Estudar com vídeo</span>
+              <span class="atalho-desc">Assista e tire dúvidas com a IA</span>
+            </span>
+            <span class="atalho-seta" aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <ol class="passos-curtos" aria-label="Como funciona">
+          <li><span class="passo-num">1</span> Anote o que tem para fazer</li>
+          <li><span class="passo-num">2</span> Monte um plano com a IA</li>
+          <li><span class="passo-num">3</span> Estude um pouco por dia</li>
         </ol>
       </div>
     </section>
 
-    <section id="planejador" class="section section--alt">
-      <div class="container">
-        <h2>Criar plano de estudos</h2>
+    <section id="agenda" class="tela" aria-labelledby="titulo-agenda" hidden>
+      <div class="container container--estreito">
+        <h2 id="titulo-agenda">Agenda</h2>
+        <p class="section-intro">Anote provas, lições de casa e trabalhos para não esquecer nada.</p>
+        <div id="agenda-app">
+          <p class="carregando">Carregando agenda…</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="planejador" class="tela" aria-labelledby="titulo-planejador" hidden>
+      <div class="container container--estreito">
+        <h2 id="titulo-planejador">Criar plano de estudos</h2>
         <p class="section-intro">
-          Os materiais são analisados por IA (Google Gemini). Se a IA não estiver disponível, o plano é montado no modo local, direto no navegador.
+          Responda 3 passos rápidos e receba um passo a passo até o dia da prova.
         </p>
 
-        <form id="form-plano" class="form" novalidate>
-          <div class="form-row">
-            <label for="materia">Matéria</label>
-            <input id="materia" name="materia" type="text" placeholder="Ex.: Biologia" required>
+        <form id="form-plano" class="form cartao" novalidate>
+          <div class="etapas-indicador" aria-live="polite">
+            <p class="etapas-texto"><span id="etapa-atual-texto">Passo 1 de 3</span> · <span id="etapa-nome">Sobre a prova</span></p>
+            <ol class="etapas-pontos" aria-hidden="true">
+              <li class="etapa-ponto is-ativo"></li>
+              <li class="etapa-ponto"></li>
+              <li class="etapa-ponto"></li>
+            </ol>
           </div>
 
-          <div class="form-grid">
+          <fieldset class="etapa" data-etapa="1" data-nome="Sobre a prova">
+            <legend class="sr-only">Passo 1: sobre a prova</legend>
             <div class="form-row">
-              <label for="data-prova">Data da prova</label>
-              <input id="data-prova" name="dataProva" type="date" required>
+              <label for="materia">Matéria</label>
+              <input id="materia" name="materia" type="text" placeholder="Ex.: Biologia" autocomplete="off" required>
             </div>
+
+            <div class="form-grid">
+              <div class="form-row">
+                <label for="data-prova">Data da prova</label>
+                <input id="data-prova" name="dataProva" type="date" required>
+              </div>
+              <div class="form-row">
+                <label for="horas-dia">Tempo por dia</label>
+                <select id="horas-dia" name="horasPorDia">
+                  <option value="0.5">30 minutos</option>
+                  <option value="1" selected>1 hora</option>
+                  <option value="2">2 horas</option>
+                  <option value="3">3 horas</option>
+                  <option value="4">4 horas ou mais</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="etapa" data-etapa="2" data-nome="O que vai cair" hidden>
+            <legend class="sr-only">Passo 2: o que vai cair</legend>
             <div class="form-row">
-              <label for="horas-dia">Tempo por dia</label>
-              <select id="horas-dia" name="horasPorDia">
-                <option value="0.5">30 minutos</option>
-                <option value="1" selected>1 hora</option>
-                <option value="2">2 horas</option>
-                <option value="3">3 horas</option>
-                <option value="4">4 horas ou mais</option>
-              </select>
+              <label for="conteudo">Conteúdo da prova</label>
+              <textarea id="conteudo" name="conteudo" rows="7"
+                placeholder="Cole aqui os tópicos ou o texto do material. Dica: um tópico por linha."></textarea>
             </div>
-          </div>
 
-          <div class="form-row">
-            <label for="conteudo">Conteúdo da prova</label>
-            <textarea id="conteudo" name="conteudo" rows="8"
-              placeholder="Cole aqui os tópicos ou o texto do material. Dica: um tópico por linha, ou use títulos (# Título) seguidos do texto."></textarea>
-          </div>
+            <div class="form-row">
+              <label for="arquivos">Arquivos do professor <span class="hint">(PDF, imagem, .txt ou .md)</span></label>
+              <input id="arquivos" name="arquivos" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md,application/pdf,image/*,text/plain,text/markdown" multiple>
+              <p class="hint">Slides: exporte como PDF. PDFs e imagens são lidos pela IA (até ~15 MB no total).</p>
+            </div>
 
-          <div class="form-row">
-            <label for="arquivos">Arquivos do professor <span class="hint">(PDF, imagem, .txt ou .md)</span></label>
-            <input id="arquivos" name="arquivos" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md,application/pdf,image/*,text/plain,text/markdown" multiple>
-            <p class="hint">Slides: exporte como PDF. PDFs e imagens são lidos pela IA (até ~15 MB no total).</p>
-          </div>
+            <div class="form-row">
+              <label for="links">Links <span class="hint">(vídeos, artigos, slides — um por linha)</span></label>
+              <textarea id="links" name="links" rows="3" placeholder="https://…"></textarea>
+            </div>
+          </fieldset>
 
-          <div class="form-row">
-            <label for="links">Links (vídeos, artigos, slides)</label>
-            <textarea id="links" name="links" rows="3" placeholder="Um link por linha"></textarea>
-          </div>
+          <fieldset class="etapa" data-etapa="3" data-nome="Revisar e gerar" hidden>
+            <legend class="sr-only">Passo 3: revisar e gerar</legend>
+            <p class="revisao-intro">Confira se está tudo certo:</p>
+            <dl id="etapa-revisao" class="revisao"></dl>
+            <p class="hint">O conteúdo é analisado por IA (Google Gemini). Se a IA não estiver disponível, o plano é montado no modo local, direto no navegador.</p>
+          </fieldset>
 
           <p id="form-erro" class="form-erro" role="alert" hidden></p>
 
-          <button type="submit" id="btn-gerar" class="btn">Gerar plano</button>
+          <div class="etapas-botoes">
+            <button type="button" id="btn-etapa-voltar" class="btn btn--secundario" hidden>Voltar</button>
+            <button type="button" id="btn-etapa-continuar" class="btn">Continuar</button>
+            <button type="submit" id="btn-gerar" class="btn" hidden>Gerar plano</button>
+          </div>
         </form>
 
         <div id="resultado-plano" class="plano" hidden>
@@ -136,11 +199,11 @@
       </div>
     </section>
 
-    <section id="estudar" class="section">
+    <section id="estudar" class="tela" aria-labelledby="titulo-estudar" hidden>
       <div class="container">
-        <h2>Estudar com vídeo</h2>
+        <h2 id="titulo-estudar">Estudar com vídeo</h2>
         <p class="section-intro">
-          Assista a uma videoaula do YouTube e tire suas dúvidas com a IA ao mesmo tempo. A IA assiste ao vídeo junto com você e usa os tópicos do seu plano para responder.
+          Abra uma videoaula do YouTube e tire dúvidas com a IA enquanto assiste.
         </p>
 
         <div class="estudo-grid">
@@ -158,41 +221,21 @@
             <ul id="estudo-sugestoes" class="chips"></ul>
           </div>
 
-          <div class="chat">
+          <div class="chat cartao">
             <div class="chat-topo">
               <h3>Pergunte à IA</h3>
               <div class="chat-acoes">
-            <button type="button" id="btn-resumir-video" class="btn btn--pequeno" hidden>Resumir o vídeo</button>
-            <button type="button" id="btn-limpar-chat" class="btn btn--secundario btn--pequeno">Limpar</button>
-          </div>
+                <button type="button" id="btn-resumir-video" class="btn btn--pequeno" hidden>Resumir o vídeo</button>
+                <button type="button" id="btn-limpar-chat" class="btn btn--secundario btn--pequeno">Limpar</button>
+              </div>
             </div>
             <div id="chat-mensagens" class="chat-mensagens" aria-live="polite"></div>
             <form id="form-chat" class="chat-form">
               <label for="chat-pergunta" class="sr-only">Sua pergunta</label>
-              <textarea id="chat-pergunta" rows="2" placeholder="Ex.: Não entendi a diferença entre mitose e meiose"></textarea>
+              <textarea id="chat-pergunta" rows="2" placeholder="Pergunte qualquer coisa da escola: matéria, lição, trabalho…"></textarea>
               <button type="submit" id="btn-enviar-chat" class="btn">Enviar</button>
             </form>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="em-breve" class="section section--alt">
-      <div class="container">
-        <h2>Em breve</h2>
-        <div class="card-grid">
-          <article class="card card--placeholder">
-            <h3>Flashcards</h3>
-            <p>Cartões de memorização gerados a partir do seu plano.</p>
-          </article>
-          <article class="card card--placeholder">
-            <h3>Simulados</h3>
-            <p>Questões de múltipla escolha com correção e explicação.</p>
-          </article>
-          <article class="card card--placeholder">
-            <h3>Artigos e tutoriais</h3>
-            <p>Conteúdos sobre técnicas de estudo e sobre inteligência artificial.</p>
-          </article>
         </div>
       </div>
     </section>
@@ -206,6 +249,7 @@
 
   <script src="js/planejador.js"></script>
   <script src="js/estudo.js"></script>
+  <script src="js/etapas.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
