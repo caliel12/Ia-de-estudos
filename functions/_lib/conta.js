@@ -20,8 +20,15 @@ export function normalizarEmail(valor) {
   return email.length <= 254 && EMAIL.test(email) ? email : "";
 }
 
-// Só aceita JSON: formulários de outros sites não conseguem enviar esse tipo sem permissão (CORS).
+// Pedido vindo de outro site (o navegador manda o Origin em POST/PUT).
+export function outraOrigem(request) {
+  const origem = request.headers.get("Origin");
+  return !!origem && origem !== new URL(request.url).origin;
+}
+
+// Só aceita JSON do próprio site: formulários de outros sites não conseguem enviar esse tipo sem permissão (CORS).
 export async function lerJSON(request) {
+  if (outraOrigem(request)) return null;
   if (!(request.headers.get("Content-Type") || "").includes("application/json")) return null;
   try {
     return await request.json();

@@ -4,6 +4,8 @@
 
   var CHAVES = { agenda: "ia-de-estudos:agenda", plano: "ia-de-estudos:plano", perfil: "ia-de-estudos:perfil" };
   var MARCA_RECARGA = "ia-de-estudos:conta-recarregou";
+  // Fica no navegador enquanto houver mudança que ainda não chegou na conta (ex.: sem internet).
+  var MARCA_PENDENTE = "ia-de-estudos:conta-pendente";
   var ESPERA_ENVIO = 1500;
 
   var emailAtual = "";
@@ -12,6 +14,8 @@
   var pendente = false;
   // Há mudança feita neste navegador que ainda não chegou na conta.
   var alterado = false;
+  var saindo = false;
+  var envioAtual = Promise.resolve();
 
   var $ = function (id) {
     return document.getElementById(id);
@@ -59,12 +63,28 @@
     return { agenda: Array.isArray(agenda) ? agenda : [], plano: lerLocal("plano"), perfil: lerLocal("perfil") };
   }
 
+  function marcarPendente(sim) {
+    try {
+      if (sim) localStorage.setItem(MARCA_PENDENTE, "1");
+      else localStorage.removeItem(MARCA_PENDENTE);
+    } catch (e) {}
+  }
+
+  function temPendente() {
+    try {
+      return localStorage.getItem(MARCA_PENDENTE) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
   function mesmoConteudo(a, b) {
     return JSON.stringify(a == null ? null : a) === JSON.stringify(b == null ? null : b);
   }
 
   // Aplica os dados da conta neste navegador e recarrega a página se algo mudou.
   function aplicar(remoto, destino) {
+    if (saindo) return;
     var local = dadosLocais();
     var mudou = false;
     ["agenda", "plano", "perfil"].forEach(function (chave) {
@@ -104,16 +124,17 @@
 
   function enviar() {
     timerEnvio = null;
-    if (!emailAtual) return;
+    if (!emailAtual) return envioAtual;
     if (enviando) {
       pendente = true;
-      return;
+      return envioAtual;
     }
     enviando = true;
     alterado = false;
     mostrarSalvo("Salvando…");
-    api("dados", "PUT", dadosLocais())
+    envioAtual = api("dados", "PUT", dadosLocais())
       .then(function () {
+        if (!alterado && !pendente) marcarPendente(false);
         mostrarSalvo("Tudo salvo na sua conta.");
       })
       .catch(function (e) {
@@ -133,17 +154,20 @@
           agendarEnvio();
         }
       });
+    return envioAtual;
   }
 
   function agendarEnvio() {
     if (!emailAtual) return;
     alterado = true;
+    marcarPendente(true);
+    if (saindo) return;
     clearTimeout(timerEnvio);
     timerEnvio = setTimeout(enviar, ESPERA_ENVIO);
   }
 
   function enviarAntesDeSair() {
-    if (!timerEnvio || !emailAtual) return;
+    if (!timerEnvio || !emailAtual || saindo) return;
     clearTimeout(timerEnvio);
     timerEnvio = null;
     try {
@@ -235,24 +259,34 @@
     $("btn-conta-sair").addEventListener("click", function () {
       var botao = this;
       botao.disabled = true;
+      saindo = true;
       clearTimeout(timerEnvio);
-      // Só envia se houver mudança pendente: uma aba desatualizada não pode apagar o que outro aparelho salvou.
-      var antes = emailAtual && alterado ? api("dados", "PUT", dadosLocais()).catch(function () {}) : Promise.resolve();
-      antes
+      timerEnvio = null;
+      mostrarMensagem("");
+      // Espera o envio em andamento e só manda de novo se ainda houver mudança: uma aba desatualizada não pode apagar o que outro aparelho salvou.
+      envioAtual
+        .then(function () {
+          if (emailAtual && (alterado || pendente)) return api("dados", "PUT", dadosLocais());
+        })
         .then(function () {
           return api("sair", "POST", {});
         })
-        .catch(function () {})
         .then(function () {
           emailAtual = "";
-          clearTimeout(timerEnvio);
-          timerEnvio = null;
+          marcarPendente(false);
           // Em computador compartilhado, ninguém vê a agenda depois que você sai.
           gravarLocal("agenda", null);
           gravarLocal("plano", null);
           gravarLocal("perfil", null);
           location.hash = "#inicio";
           location.reload();
+        })
+        .catch(function () {
+          // Sem apagar nada: as mudanças ainda não salvas continuam aqui.
+          saindo = false;
+          botao.disabled = false;
+          if (alterado) agendarEnvio();
+          mostrarMensagem("Não deu para sair agora porque algo ainda não foi salvo na conta. Confira a internet e tente de novo.");
         });
     });
   }
@@ -274,7 +308,8 @@
         atualizarTela();
         if (recarregou) return;
         return api("dados").then(function (remoto) {
-          if (remoto.atualizadoEm) aplicar(remoto);
+          // Mudança feita aqui que não chegou na conta (ex.: sem internet) vale mais que a cópia da conta.
+          if (remoto.atualizadoEm && !temPendente()) aplicar(remoto);
           else agendarEnvio();
         });
       })
@@ -285,15 +320,19 @@
 
     document.addEventListener("ia-de-estudos:dados-alterados", agendarEnvio);
     window.addEventListener("pagehide", enviarAntesDeSair);
+    // Página restaurada pelo "voltar" do navegador: confirma o envio que pode ter ficado pela metade.
+    window.addEventListener("pageshow", function (ev) {
+      if (ev.persisted && emailAtual && alterado && !enviando) agendarEnvio();
+    });
     document.addEventListener("visibilitychange", atualizarDaConta);
   }
 
   // Ao voltar para a aba, traz o que foi salvo em outro aparelho (se aqui não há nada por enviar).
   function atualizarDaConta() {
-    if (document.visibilityState !== "visible" || !emailAtual || alterado || enviando) return;
+    if (document.visibilityState !== "visible" || !emailAtual || alterado || enviando || saindo) return;
     api("dados")
       .then(function (remoto) {
-        if (remoto.atualizadoEm && !alterado) aplicar(remoto);
+        if (remoto.atualizadoEm && !alterado && !enviando && !saindo) aplicar(remoto);
       })
       .catch(function () {});
   }
