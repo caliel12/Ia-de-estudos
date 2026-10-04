@@ -16,17 +16,29 @@ Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A I
 
 A IA lê os materiais e devolve os tópicos, com resumo, perguntas e respostas e termos de busca de vídeo. O cronograma (datas, revisões, simulado) é calculado no navegador. Se a IA não estiver disponível (por exemplo, abrindo o `index.html` direto do disco), o site usa o **modo local**, que extrai os tópicos do texto colado.
 
+## Agenda escolar
+
+Na seção **Agenda** dá para anotar provas, lições de casa e trabalhos (tipo, título, matéria, data, hora e observação). A lista fica em ordem de prazo, com rótulos como "Amanhã" ou "Atrasado há 2 dias" e uma faixa de avisos com o que vence em até 3 dias. Tudo fica salvo no navegador (`localStorage`).
+
+- **Ativar avisos**: notificações do navegador para itens atrasados ou que vencem hoje/amanhã (provas: até 3 dias antes), no máximo uma vez por dia por item. Só funcionam com o site aberto; o `sw.js` serve apenas para mostrar e abrir essas notificações (sem cache offline).
+- **Google Agenda** e **Baixar lembrete (.ics)**: para ser lembrado com o site fechado. O `.ics` traz alarme 1 dia antes (provas também 3 dias antes) e pode ser importado no celular.
+- Em provas, **Criar plano de estudos** preenche matéria e data no planejador.
+- `window.IAEstudosAgenda.paraIA()` devolve os itens pendentes (atrasados e dos próximos 30 dias) para o chat da IA.
+
 ## Estrutura
 
 ```
 ia-de-estudos/
 ├── index.html          # Página inicial + formulário do planejador
 ├── css/
-│   └── style.css       # Estilos (layout responsivo, tipografia, header/footer, impressão)
+│   ├── style.css       # Estilos (layout responsivo, tipografia, header/footer, impressão)
+│   └── agenda.css      # Estilos da agenda
 ├── js/
 │   ├── planejador.js   # Envio dos materiais, cronograma e exibição do plano
+│   ├── agenda.js       # Agenda de provas/lições com lembretes (.ics, Google Agenda, notificações)
 │   ├── estudo.js       # Player do YouTube e chat da escola com a IA
 │   └── main.js         # Ano dinâmico no rodapé, menu mobile
+├── sw.js               # Service worker mínimo para as notificações da agenda
 ├── functions/
 │   ├── _lib/
 │   │   └── gemini.js       # Chamada ao Gemini compartilhada (modelos de reserva, erros)
