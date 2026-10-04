@@ -128,7 +128,24 @@
     if (resultado.hidden) irPara(1, false);
   }
 
+  // Vindo da agenda: mostra o formulário no passo 1 já preenchido; o plano salvo não é apagado.
+  function iniciarNovoPlano(evento) {
+    const form = $("form-plano");
+    const resultado = $("resultado-plano");
+    if (!form) return;
+    const { materia = "", data = "" } = evento.detail || {};
+
+    form.reset();
+    form.materia.value = materia;
+    form.dataProva.value = data;
+    mostrarErro("");
+    if (resultado) resultado.hidden = true;
+    form.hidden = false;
+    irPara(1, false);
+  }
+
   document.addEventListener("ia-de-estudos:plano", sincronizarComResultado);
+  document.addEventListener("ia-de-estudos:novo-plano", iniciarNovoPlano);
 
   document.addEventListener("DOMContentLoaded", () => {
     const form = $("form-plano");

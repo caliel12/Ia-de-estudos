@@ -440,6 +440,7 @@
   var checkConcluidos = el("input", { type: "checkbox", id: "agenda-mostrar-concluidos" });
   var rotuloConcluidos = el("label", { classe: "agenda-concluidos", for: "agenda-mostrar-concluidos" }, [checkConcluidos, " Mostrar concluídos"]);
 
+  raiz.replaceChildren();
   raiz.classList.add("agenda");
   raiz.appendChild(faixa);
   raiz.appendChild(
@@ -522,18 +523,11 @@
     estadoAvisos.hidden = !t[1];
   }
 
+  // O js/etapas.js preenche o formulário e mostra o passo 1, mesmo se já houver um plano gerado.
   function criarPlano(item) {
-    var materia = document.getElementById("materia");
-    var dataProva = document.getElementById("data-prova");
-    if (materia) {
-      materia.value = item.materia || item.titulo;
-      materia.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-    if (dataProva) {
-      dataProva.value = item.data;
-      dataProva.dispatchEvent(new Event("input", { bubbles: true }));
-      dataProva.dispatchEvent(new Event("change", { bubbles: true }));
-    }
+    document.dispatchEvent(new CustomEvent("ia-de-estudos:novo-plano", {
+      detail: { materia: item.materia || item.titulo, data: item.data }
+    }));
     location.hash = "#planejador";
   }
 
