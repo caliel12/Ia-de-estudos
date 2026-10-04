@@ -5,6 +5,7 @@
   const URL_CHAT = "api/perguntar";
   const CHAVE_PLANO = "ia-de-estudos:plano";
   const CHAVE_VIDEO = "ia-de-estudos:video";
+  const CHAVE_PERFIL = "ia-de-estudos:perfil";
   const MAX_HISTORICO = 20;
   const BOAS_VINDAS = "Oi! Posso te ajudar com qualquer coisa da escola: matérias, lições, trabalhos e provas. Se abrir um vídeo, eu assisto junto com você.";
   const PEDIDO_RESUMO = "Resuma este vídeo com os pontos principais que podem cair na prova.";
@@ -29,6 +30,14 @@
     }
     id = id.split("/")[0];
     return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+  }
+
+  function lerIdade() {
+    try {
+      return (JSON.parse(localStorage.getItem(CHAVE_PERFIL)) || {}).idade || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   function lerPlano() {
@@ -160,6 +169,7 @@
           topicos: topicosDoPlano(plano).map(({ titulo, resumo }) => ({ titulo, resumo })),
           video: videoAtual,
           agenda: agendaParaIA(),
+          idade: lerIdade(),
         }),
       });
     } catch (e) {

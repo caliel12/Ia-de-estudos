@@ -1,6 +1,7 @@
 // Cloudflare Pages Function: POST /api/perguntar
 // Chat da escola: responde o estudante usando a agenda, o plano de estudos e o vídeo aberto (o Gemini assiste ao vídeo do YouTube).
 import { chamarGemini, json, texto } from "../_lib/gemini.js";
+import { idadeValida, instrucoesDeTom } from "../_lib/tom.js";
 
 const MAX_HISTORICO = 20;
 const MAX_TOPICOS = 20;
@@ -11,13 +12,14 @@ const HORA = /^\d{2}:\d{2}$/;
 const TIPOS_AGENDA = ["Prova", "Lição de casa", "Trabalho", "Outro"];
 const DIAS_SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
 
-const INSTRUCOES = `Você é um assistente escolar paciente que ajuda estudantes brasileiros do ensino fundamental e médio em tudo relacionado à escola: provas, lições de casa, trabalhos, redação, organização dos estudos e dúvidas de qualquer matéria.
-Responda em português do Brasil, de forma clara e didática, em no máximo 3 parágrafos curtos.
+const INSTRUCOES = `Você é um assistente escolar paciente e gente boa que ajuda estudantes brasileiros do ensino fundamental e médio em tudo relacionado à escola: provas, lições de casa, trabalhos, redação, organização dos estudos e dúvidas de qualquer matéria.
+Responda em português do Brasil, de forma clara, em no máximo 3 parágrafos curtos.
 Use texto simples, sem markdown (sem asteriscos, #, tabelas); listas curtas com "- " são permitidas.
 Em lição de casa e trabalhos, não entregue a resposta pronta: oriente passo a passo, explique o raciocínio e deixe o estudante chegar na resposta. Se ele mostrar a resposta dele, confira, diga o que está certo e explique onde errou.
 Em redação, ajude a planejar (tema, tese, argumentos, estrutura) e dê dicas sobre o texto do estudante, sem escrever a redação inteira por ele.
 Quando fizer sentido, dê um exemplo e termine com uma pergunta curta para o estudante testar o que aprendeu ou dar o próximo passo.
 Use os tópicos do plano de estudos como contexto quando a dúvida for sobre a matéria da prova.
+Se houver uma etapa do plano aberta, o estudante está estudando essa etapa agora: foque nela. Se houver o resultado do último simulado, use-o para ajudar no que ele errou, explicando de outro jeito e propondo uma pergunta parecida para ele treinar.
 Se houver uma agenda do estudante, use-a para responder perguntas como "o que eu tenho essa semana?" ou "o que devo estudar primeiro?": considere a data de hoje informada, priorize o que vence antes e o que vale mais (provas e trabalhos) e sugira um pequeno plano. Não invente compromissos que não estão na agenda.
 Quando houver um vídeo anexado, ele é a videoaula que o estudante está assistindo: use o que é falado e mostrado nele para responder e, quando ajudar, cite o momento aproximado (ex.: "por volta de 3:20").
 Se não houver vídeo anexado e a dúvida for sobre um trecho, explique o assunto e peça que o estudante descreva o trecho.
@@ -50,6 +52,38 @@ function validarAgenda(agenda) {
   return { hoje: dataValida(agenda.hoje), itens };
 }
 
+function validarEtapa(etapa) {
+  if (!etapa || typeof etapa !== "object") return null;
+  const titulo = texto(etapa.titulo, 300);
+  if (!titulo) return null;
+  const topicos = (Array.isArray(etapa.topicos) ? etapa.topicos : [])
+    .slice(0, 5)
+    .map((t) => ({ titulo: texto(t && t.titulo, 120), resumo: texto(t && t.resumo, 1500) }))
+    .filter((t) => t.titulo);
+  const s = etapa.simulado && typeof etapa.simulado === "object" ? etapa.simulado : null;
+  const nota = s ? Number(s.nota) : NaN;
+  const simulado = s && nota >= 0 && nota <= 10
+    ? {
+        etapa: texto(s.etapa, 300),
+        nota,
+        erros: (Array.isArray(s.erros) ? s.erros : []).slice(0, 12).map((e) => texto(e, 1500)).filter(Boolean),
+        revisar: (Array.isArray(s.revisar) ? s.revisar : []).slice(0, 10).map((r) => texto(r, 600)).filter(Boolean),
+      }
+    : null;
+  return { titulo, topicos, simulado };
+}
+
+function blocoDaEtapa({ titulo, topicos, simulado }) {
+  const linhas = [`Etapa do plano que o estudante está estudando agora: ${titulo}`];
+  topicos.forEach((t) => linhas.push(`- ${t.titulo}${t.resumo ? `: ${t.resumo}` : ""}`));
+  if (simulado) {
+    linhas.push(`Último simulado${simulado.etapa ? ` (${simulado.etapa})` : ""}: nota ${String(simulado.nota).replace(".", ",")} de 10.`);
+    if (simulado.erros.length > 0) linhas.push("Onde foi mal:", ...simulado.erros.map((e) => `- ${e}`));
+    if (simulado.revisar.length > 0) linhas.push("O que revisar:", ...simulado.revisar.map((r) => `- ${r}`));
+  }
+  return linhas.join("\n");
+}
+
 function validar(dados) {
   const pergunta = texto(dados && dados.pergunta, 2000);
   if (!pergunta) return { erro: "Escreva uma pergunta." };
@@ -69,8 +103,10 @@ function validar(dados) {
     historico,
     topicos,
     agenda: validarAgenda(dados.agenda),
+    etapa: validarEtapa(dados.etapa),
     materia: texto(dados.materia, 200),
     video: URL_VIDEO.test(texto(dados.video, 300)) ? dados.video.trim() : "",
+    idade: idadeValida(dados.idade),
   };
 }
 
@@ -110,12 +146,13 @@ function blocoDaAgenda(agenda) {
   return `${cabecalho}\n${itens.map((i) => linhaDaAgenda(i, agenda.hoje)).join("\n")}`;
 }
 
-function montarEntrada({ pergunta, historico, topicos, agenda, materia, video }) {
+function montarEntrada({ pergunta, historico, topicos, agenda, etapa, materia, video }) {
   return [
     agenda && blocoDaAgenda(agenda),
     materia && `Matéria do plano de estudos: ${materia}`,
     topicos.length > 0 &&
       "Tópicos do plano de estudos:\n" + topicos.map((t) => `- ${t.titulo}${t.resumo ? `: ${t.resumo}` : ""}`).join("\n"),
+    etapa && blocoDaEtapa(etapa),
     historico.length > 0 &&
       "Conversa até agora:\n" + historico.map((m) => `${m.papel === "ia" ? "Assistente" : "Estudante"}: ${m.texto}`).join("\n"),
     `Nova pergunta do estudante: ${pergunta}`,
@@ -136,9 +173,10 @@ export async function onRequestPost({ request, env }) {
   if (validado.erro) return json({ erro: validado.erro }, 400);
 
   const textoEntrada = montarEntrada(validado);
+  const instrucoes = `${INSTRUCOES}\n\n${instrucoesDeTom(validado.idade)}`;
   if (validado.video) {
     const comVideo = await chamarGemini(env, {
-      system_instruction: INSTRUCOES,
+      system_instruction: instrucoes,
       input: [
         { type: "video", uri: validado.video },
         { type: "text", text: textoEntrada },
@@ -148,7 +186,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   // Sem vídeo (ou o vídeo não pôde ser lido: privado, longo demais ou sem cota): responde só com o texto.
-  const ia = await chamarGemini(env, { system_instruction: INSTRUCOES, input: textoEntrada });
+  const ia = await chamarGemini(env, { system_instruction: instrucoes, input: textoEntrada });
   if (ia.erro) return ia.erro;
   return json({ resposta: ia.texto.trim(), semVideo: Boolean(validado.video) });
 }

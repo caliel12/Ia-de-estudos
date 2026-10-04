@@ -51,6 +51,7 @@
     const conteudo = resumir(form.conteudo.value, 140);
 
     $("etapa-revisao").replaceChildren(
+      linhaRevisao("Idade", `${form.idade.value} anos`, 1),
       linhaRevisao("Matéria", form.materia.value.trim(), 1),
       linhaRevisao("Data da prova", formatarData(form.dataProva.value), 1),
       linhaRevisao("Tempo por dia", horas ? horas.textContent : "", 1),
@@ -60,7 +61,24 @@
     );
   }
 
+  function idadeSalva() {
+    try {
+      return (JSON.parse(localStorage.getItem("ia-de-estudos:perfil")) || {}).idade || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function preencherIdade(form) {
+    if (form.idade && !form.idade.value) form.idade.value = idadeSalva();
+  }
+
   function validarPasso1(form) {
+    const idade = Number(form.idade.value);
+    if (!form.idade.value || !Number.isInteger(idade) || idade < 5 || idade > 99) {
+      form.idade.focus();
+      return "Diga quantos anos você tem (de 5 a 99).";
+    }
     if (!form.materia.value.trim()) {
       form.materia.focus();
       return "Informe a matéria.";
@@ -138,6 +156,7 @@
     form.reset();
     form.materia.value = materia;
     form.dataProva.value = data;
+    preencherIdade(form);
     mostrarErro("");
     if (resultado) resultado.hidden = true;
     form.hidden = false;
@@ -176,9 +195,13 @@
 
     form.addEventListener("reset", () => {
       mostrarErro("");
-      setTimeout(() => irPara(1, false));
+      setTimeout(() => {
+        preencherIdade(form);
+        irPara(1, false);
+      });
     });
 
+    preencherIdade(form);
     sincronizarComResultado();
   });
 })();
