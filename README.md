@@ -71,7 +71,7 @@ Variáveis opcionais:
 | --- | --- | --- |
 | `GEMINI_MODEL` | `gemini-3.8-flash` | Trocar o modelo (ex.: `gemini-3.5-flash-lite` para limites maiores) |
 
-**Atenção ao plano gratuito do Gemini:** ele tem limite de requisições (o site mostra um aviso e volta ao modo local quando o limite é atingido), e o Google pode usar o conteúdo enviado para melhorar seus produtos. Não ative cobrança no projeto da chave se quiser garantir custo zero.
+**Atenção ao plano gratuito do Gemini:** ele tem limite de requisições e às vezes fica sobrecarregado. Nesses casos a função tenta automaticamente os modelos de reserva (`gemini-3.5-flash` e `gemini-3.5-flash-lite`); se todos falharem, o site mostra um aviso e volta ao modo local, e o Google pode usar o conteúdo enviado para melhorar seus produtos. Não ative cobrança no projeto da chave se quiser garantir custo zero.
 
 ## Roadmap
 
