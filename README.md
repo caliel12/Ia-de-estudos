@@ -10,11 +10,23 @@ Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A I
 
 1. **Escolha a data da prova**: matéria, data e quanto tempo você tem por dia.
 2. **Adicione os materiais**: cole o conteúdo, envie PDFs (slides exportados em PDF), imagens, arquivos `.txt`/`.md` ou adicione links.
-3. **Siga o plano**: um cronograma dia a dia com leitura, perguntas, vídeos, revisões espaçadas, um simulado na véspera e o progresso salvo no navegador.
-4. **Tire dúvidas de tudo da escola**: o chat com a IA ajuda com qualquer matéria, lições de casa, trabalhos, redação, provas e organização dos estudos. Em lições e trabalhos ele explica o passo a passo para você chegar na resposta (e confere a sua), em vez de só entregar a resposta pronta. Como contexto, ele usa a **agenda** (provas, lições e trabalhos com data, para responder "o que eu tenho essa semana?" ou "o que estudo primeiro?") e os tópicos do **plano de estudos**.
-5. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site; a IA do chat assiste ao vídeo junto com você (vídeos públicos). O botão "Resumir o vídeo" pede um resumo dos pontos principais. Se o vídeo não puder ser lido (privado ou longo demais), a IA responde sem ele e avisa.
+3. **Siga o plano, uma etapa de cada vez**: cada tópico vem com resumo, explicação completa, exemplo resolvido, macete, erros comuns, perguntas de revisão e vídeos. Só a etapa de agora fica aberta; as próximas aparecem bloqueadas (só o título) até você concluir a atual. Ao concluir, o site te parabeniza e sugere uma pausa até o dia seguinte (dá para continuar mesmo assim). O progresso fica salvo no navegador (e na conta, se você entrar).
+4. **Faça os mini simulados**: no fim de cada etapa de estudo tem um mini simulado (e um simulado geral na véspera da prova). A IA cria as questões na hora, corrige, dá a nota e explica onde você foi mal e o que revisar. Os pontos fracos viram um reforço no começo das próximas etapas e caem mais no simulado geral.
+5. **Pergunte à IA durante o plano**: o botão **Perguntar à IA** da etapa aberta abre um chat (gaveta lateral no computador, folha de baixo no celular) que já sabe qual etapa você está estudando e como foi no último simulado.
+6. **Tire dúvidas de tudo da escola**: o chat com a IA ajuda com qualquer matéria, lições de casa, trabalhos, redação, provas e organização dos estudos. Em lições e trabalhos ele explica o passo a passo para você chegar na resposta (e confere a sua), em vez de só entregar a resposta pronta. Como contexto, ele usa a **agenda** (provas, lições e trabalhos com data, para responder "o que eu tenho essa semana?" ou "o que estudo primeiro?") e os tópicos do **plano de estudos**.
+7. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site; a IA do chat assiste ao vídeo junto com você (vídeos públicos). O botão "Resumir o vídeo" pede um resumo dos pontos principais. Se o vídeo não puder ser lido (privado ou longo demais), a IA responde sem ele e avisa.
 
 A IA lê os materiais e devolve os tópicos, com resumo, perguntas e respostas e termos de busca de vídeo. O cronograma (datas, revisões, simulado) é calculado no navegador. Se a IA não estiver disponível (por exemplo, abrindo o `index.html` direto do disco), o site usa o **modo local**, que extrai os tópicos do texto colado.
+
+## Plano de estudos e simulados
+
+- **Conteúdo por tópico** (`functions/api/gerar-plano.js`): resumo, explicação em parágrafos, exemplo resolvido, macete, erros comuns, perguntas com resposta e busca de vídeo. No modo local, o resumo e a explicação saem do texto colado.
+- **Uma etapa por vez** (`js/planejador.js`): concluídas ficam recolhidas (com a nota do simulado), a atual fica aberta e as futuras ficam bloqueadas. Depois de concluir, aparece a pausa "volta amanhã" (`plano.descansoAte`) com o botão **Continuar mesmo assim**.
+- **Simulados** (`js/simulado.js`): gerados só quando o estudante clica em **Começar simulado**, para não deixar a criação do plano lenta. Mini simulado = 4 de múltipla escolha + 1 discursiva (`POST /api/gerar-simulado`, tipo `topico`); simulado geral = 8 + 2 (tipo `final`), com cerca de metade das questões nos pontos fracos. Uma questão por tela; as respostas ficam salvas enquanto o estudante responde.
+- **Correção** (`POST /api/corrigir-simulado`): a múltipla escolha é conferida pelo gabarito; a IA corrige as discursivas (1, 0,5 ou 0), explica cada erro e diz o que revisar. Tópicos abaixo de 70% viram **pontos fracos**, que aparecem como "Reforço antes de começar" nas etapas seguintes e pesam mais no simulado geral.
+- **Sem IA**: o simulado é montado no navegador com as perguntas de revisão e o texto do plano, corrigido automaticamente e com um aviso de que não tem explicação personalizada. Se só a correção falhar, a nota sai da múltipla escolha e as discursivas mostram a resposta esperada.
+- **Chat do plano** (`js/plano-chat.js`): usa `POST /api/perguntar` com o campo `etapa` (título, tópicos com resumo e o último simulado: nota, erros e o que revisar), além da idade e da agenda. O histórico é separado do chat da tela "Estudar com vídeo".
+- **Onde fica salvo**: tudo no próprio plano (`localStorage["ia-de-estudos:plano"]`): `concluidos`, `descansoAte` e `simulados[índiceDaEtapa]` (questões, respostas e resultado). Toda mudança passa por `salvar()`, que dispara `ia-de-estudos:dados-alterados` para sincronizar com a conta. Se o plano passar de ~450 KB, as questões dos simulados mais antigos são apagadas (o resultado fica). Planos salvos antes dessa versão abrem normalmente.
 
 ## Jeito de falar da IA
 
@@ -47,7 +59,9 @@ ia-de-estudos/
 │   ├── style.css       # Estilos (layout responsivo, tipografia, header/footer, impressão)
 │   └── agenda.css      # Estilos da agenda
 ├── js/
-│   ├── planejador.js   # Envio dos materiais, cronograma e exibição do plano
+│   ├── planejador.js   # Envio dos materiais, cronograma e plano em etapas (bloqueio, pausa, progresso)
+│   ├── simulado.js     # Mini simulados e simulado geral: questões, correção, reforço dos pontos fracos
+│   ├── plano-chat.js   # Gaveta "Perguntar à IA" com o contexto da etapa aberta
 │   ├── agenda.js       # Agenda de provas/lições com lembretes (.ics, Google Agenda, notificações)
 │   ├── estudo.js       # Player do YouTube e chat da escola com a IA
 │   ├── etapas.js       # Plano em 3 passos (idade, matéria e data; materiais; revisar)
@@ -58,11 +72,14 @@ ia-de-estudos/
 │   ├── _lib/
 │   │   ├── gemini.js       # Chamada ao Gemini compartilhada (modelos de reserva, erros)
 │   │   ├── tom.js          # Jeito de falar da IA conforme a idade
+│   │   ├── simulado.js     # Validação e limites compartilhados dos simulados
 │   │   └── conta.js        # Senhas, sessões e limite de tentativas (KV CONTAS)
 │   └── api/
 │       ├── conta/          # /api/conta/criar, entrar, sair, eu e dados (GET/PUT)
-│       ├── gerar-plano.js  # POST /api/gerar-plano: tópicos, resumos e perguntas a partir dos materiais
-│       └── perguntar.js    # POST /api/perguntar: chat da escola (usa agenda, plano e vídeo)
+│       ├── gerar-plano.js       # POST /api/gerar-plano: tópicos com explicação, exemplo, macete e perguntas
+│       ├── gerar-simulado.js    # POST /api/gerar-simulado: questões do mini simulado ou do simulado geral
+│       ├── corrigir-simulado.js # POST /api/corrigir-simulado: nota, erros explicados e o que revisar
+│       └── perguntar.js         # POST /api/perguntar: chat da escola (usa agenda, plano, etapa e vídeo)
 └── README.md
 ```
 
@@ -131,10 +148,11 @@ Variáveis opcionais:
 - [x] Ler PDFs e imagens dos materiais do professor
 - [x] Gerar resumos e perguntas com resposta por tópico
 - [x] Assistir vídeos do YouTube no site com chat de dúvidas com a IA
-- [ ] Flashcards e questões de múltipla escolha com correção e explicação
+- [x] Mini simulados (múltipla escolha + discursivas) com correção e explicação da IA
+- [ ] Flashcards
 - [ ] Proteger a função contra abuso (limite por usuário, Turnstile)
 - [ ] Sugerir vídeos específicos (não só buscas no YouTube)
-- [ ] Ajustar o plano conforme o desempenho do estudante nas perguntas
+- [x] Reforço dos pontos fracos dos simulados nas próximas etapas e no simulado geral
 - [x] Contas de usuário (e-mail e senha) com agenda e plano salvos na conta
 - [ ] Recuperar a senha por e-mail ou entrar com Google
 - [ ] Vários planos/matérias ao mesmo tempo

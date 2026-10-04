@@ -108,7 +108,7 @@
       <div class="container container--estreito">
         <h2 id="titulo-planejador">Criar plano de estudos</h2>
         <p class="section-intro">
-          Responda 3 passos rápidos e receba um passo a passo até o dia da prova.
+          Responda 3 passos rápidos e receba um passo a passo até o dia da prova, com explicações, mini simulados e a IA do seu lado.
         </p>
 
         <form id="form-plano" class="form cartao" novalidate>
@@ -283,6 +283,28 @@
     </section>
   </main>
 
+  <div id="plano-chat" class="gaveta" hidden>
+    <div id="plano-chat-fundo" class="gaveta-fundo"></div>
+    <section class="gaveta-painel chat" role="dialog" aria-modal="true" aria-labelledby="plano-chat-titulo">
+      <div class="chat-topo gaveta-topo">
+        <div>
+          <h3 id="plano-chat-titulo">Pergunte à IA</h3>
+          <p id="plano-chat-sub" class="hint"></p>
+        </div>
+        <button type="button" id="btn-fechar-plano-chat" class="gaveta-fechar" aria-label="Fechar o chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div id="plano-chat-mensagens" class="chat-mensagens gaveta-mensagens" aria-live="polite"></div>
+      <ul id="plano-chat-sugestoes" class="chips gaveta-sugestoes" aria-label="Sugestões de pergunta"></ul>
+      <form id="form-plano-chat" class="chat-form">
+        <label for="plano-chat-pergunta" class="sr-only">Sua pergunta sobre a etapa</label>
+        <textarea id="plano-chat-pergunta" rows="2" placeholder="Pergunte sobre esta etapa…"></textarea>
+        <button type="submit" id="btn-enviar-plano-chat" class="btn">Enviar</button>
+      </form>
+    </section>
+  </div>
+
   <footer class="site-footer">
     <div class="container">
       <p>&copy; <span id="ano-atual">2026</span> IA de Estudos. Feito para aprender.</p>
@@ -290,6 +312,8 @@
   </footer>
 
   <script src="js/planejador.js"></script>
+  <script src="js/simulado.js"></script>
+  <script src="js/plano-chat.js"></script>
   <script src="js/agenda.js"></script>
   <script src="js/estudo.js"></script>
   <script src="js/etapas.js"></script>
