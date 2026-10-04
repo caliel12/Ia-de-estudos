@@ -11,7 +11,8 @@ Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A I
 1. **Escolha a data da prova**: matéria, data e quanto tempo você tem por dia.
 2. **Adicione os materiais**: cole o conteúdo, envie PDFs (slides exportados em PDF), imagens, arquivos `.txt`/`.md` ou adicione links.
 3. **Siga o plano**: um cronograma dia a dia com leitura, perguntas, vídeos, revisões espaçadas, um simulado na véspera e o progresso salvo no navegador.
-4. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site e tire dúvidas num chat com a IA, que assiste ao vídeo (vídeos públicos) e usa os tópicos do seu plano como contexto. O botão "Resumir o vídeo" pede um resumo dos pontos principais.
+4. **Tire dúvidas de tudo da escola**: o chat com a IA ajuda com qualquer matéria, lições de casa, trabalhos, redação, provas e organização dos estudos. Em lições e trabalhos ele explica o passo a passo para você chegar na resposta (e confere a sua), em vez de só entregar a resposta pronta. Como contexto, ele usa a **agenda** (provas, lições e trabalhos com data, para responder "o que eu tenho essa semana?" ou "o que estudo primeiro?") e os tópicos do **plano de estudos**.
+5. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site; a IA do chat assiste ao vídeo junto com você (vídeos públicos). O botão "Resumir o vídeo" pede um resumo dos pontos principais. Se o vídeo não puder ser lido (privado ou longo demais), a IA responde sem ele e avisa.
 
 A IA lê os materiais e devolve os tópicos, com resumo, perguntas e respostas e termos de busca de vídeo. O cronograma (datas, revisões, simulado) é calculado no navegador. Se a IA não estiver disponível (por exemplo, abrindo o `index.html` direto do disco), o site usa o **modo local**, que extrai os tópicos do texto colado.
 
@@ -35,7 +36,7 @@ ia-de-estudos/
 ├── js/
 │   ├── planejador.js   # Envio dos materiais, cronograma e exibição do plano
 │   ├── agenda.js       # Agenda de provas/lições com lembretes (.ics, Google Agenda, notificações)
-│   ├── estudo.js       # Player do YouTube e chat de dúvidas com a IA
+│   ├── estudo.js       # Player do YouTube e chat da escola com a IA
 │   └── main.js         # Ano dinâmico no rodapé, menu mobile
 ├── sw.js               # Service worker mínimo para as notificações da agenda
 ├── functions/
@@ -43,7 +44,7 @@ ia-de-estudos/
 │   │   └── gemini.js       # Chamada ao Gemini compartilhada (modelos de reserva, erros)
 │   └── api/
 │       ├── gerar-plano.js  # POST /api/gerar-plano: tópicos, resumos e perguntas a partir dos materiais
-│       └── perguntar.js    # POST /api/perguntar: chat de dúvidas
+│       └── perguntar.js    # POST /api/perguntar: chat da escola (usa agenda, plano e vídeo)
 └── README.md
 ```
 

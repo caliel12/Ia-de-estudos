@@ -1,4 +1,4 @@
-// Estudar com vídeo: player do YouTube e chat de dúvidas com a IA (/api/perguntar).
+// Estudar com vídeo: player do YouTube e chat da escola com a IA (/api/perguntar).
 (function () {
   "use strict";
 
@@ -6,7 +6,7 @@
   const CHAVE_PLANO = "ia-de-estudos:plano";
   const CHAVE_VIDEO = "ia-de-estudos:video";
   const MAX_HISTORICO = 20;
-  const BOAS_VINDAS = "Oi! Abra um vídeo do YouTube e me pergunte o que quiser: eu assisto ao vídeo e uso os tópicos do seu plano para responder.";
+  const BOAS_VINDAS = "Oi! Posso te ajudar com qualquer coisa da escola: matérias, lições, trabalhos e provas. Se abrir um vídeo, eu assisto junto com você.";
   const PEDIDO_RESUMO = "Resuma este vídeo com os pontos principais que podem cair na prova.";
   const AVISO_SEM_VIDEO = "(Não consegui assistir a este vídeo, talvez ele seja privado ou longo demais. Respondi sem ele.)";
 
@@ -136,6 +136,16 @@
     adicionarMensagem("ia", BOAS_VINDAS);
   }
 
+  function agendaParaIA() {
+    const agenda = window.IAEstudosAgenda;
+    if (!agenda || typeof agenda.paraIA !== "function") return null;
+    try {
+      return agenda.paraIA() || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function perguntarIA(pergunta) {
     const plano = lerPlano();
     let resposta;
@@ -149,6 +159,7 @@
           materia: (plano && plano.materia) || "",
           topicos: topicosDoPlano(plano).map(({ titulo, resumo }) => ({ titulo, resumo })),
           video: videoAtual,
+          agenda: agendaParaIA(),
         }),
       });
     } catch (e) {
