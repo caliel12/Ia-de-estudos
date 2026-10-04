@@ -2,15 +2,28 @@
 
 Assistente de estudos para provas. O estudante informa a **data da prova** e os **materiais que o professor passou**, e o site monta um **passo a passo até o dia da prova**, com resumos, perguntas de revisão e vídeos.
 
-Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build.
+Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A IA é o **Google Gemini** (plano gratuito), chamada por uma função serverless da **Cloudflare Pages** (também gratuita) que guarda a chave da API fora do navegador.
+
+**Site no ar:** <https://ia-de-estudos.pages.dev>
 
 ## Como funciona
 
 1. **Escolha a data da prova**: matéria, data e quanto tempo você tem por dia.
-2. **Adicione os materiais**: cole o conteúdo, envie arquivos `.txt`/`.md` ou adicione links.
+2. **Adicione os materiais**: cole o conteúdo, envie PDFs (slides exportados em PDF), imagens, arquivos `.txt`/`.md` ou adicione links.
 3. **Siga o plano**: um cronograma dia a dia com leitura, perguntas, vídeos, revisões espaçadas, um simulado na véspera e o progresso salvo no navegador.
+4. **Tire dúvidas de tudo da escola**: o chat com a IA ajuda com qualquer matéria, lições de casa, trabalhos, redação, provas e organização dos estudos. Em lições e trabalhos ele explica o passo a passo para você chegar na resposta (e confere a sua), em vez de só entregar a resposta pronta. Como contexto, ele usa a **agenda** (provas, lições e trabalhos com data, para responder "o que eu tenho essa semana?" ou "o que estudo primeiro?") e os tópicos do **plano de estudos**.
+5. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site; a IA do chat assiste ao vídeo junto com você (vídeos públicos). O botão "Resumir o vídeo" pede um resumo dos pontos principais. Se o vídeo não puder ser lido (privado ou longo demais), a IA responde sem ele e avisa.
 
-> **Status:** protótipo. Por enquanto o plano é gerado localmente no navegador (`js/planejador.js`), sem IA. A função `gerarPlano` foi pensada para ser substituída por uma chamada a uma API de IA que devolva o mesmo formato de plano.
+A IA lê os materiais e devolve os tópicos, com resumo, perguntas e respostas e termos de busca de vídeo. O cronograma (datas, revisões, simulado) é calculado no navegador. Se a IA não estiver disponível (por exemplo, abrindo o `index.html` direto do disco), o site usa o **modo local**, que extrai os tópicos do texto colado.
+
+## Agenda escolar
+
+Na seção **Agenda** dá para anotar provas, lições de casa e trabalhos (tipo, título, matéria, data, hora e observação). A lista fica em ordem de prazo, com rótulos como "Amanhã" ou "Atrasado há 2 dias" e uma faixa de avisos com o que vence em até 3 dias. Tudo fica salvo no navegador (`localStorage`).
+
+- **Ativar avisos**: notificações do navegador para itens atrasados ou que vencem hoje/amanhã (provas: até 3 dias antes), no máximo uma vez por dia por item. Só funcionam com o site aberto; o `sw.js` serve apenas para mostrar e abrir essas notificações (sem cache offline).
+- **Google Agenda** e **Baixar lembrete (.ics)**: para ser lembrado com o site fechado. O `.ics` traz alarme 1 dia antes (provas também 3 dias antes) e pode ser importado no celular.
+- Em provas, **Criar plano de estudos** preenche matéria e data no planejador.
+- `window.IAEstudosAgenda.paraIA()` devolve os itens pendentes (atrasados e dos próximos 30 dias) para o chat da IA.
 
 ## Estrutura
 
@@ -18,10 +31,20 @@ Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build.
 ia-de-estudos/
 ├── index.html          # Página inicial + formulário do planejador
 ├── css/
-│   └── style.css       # Estilos (layout responsivo, tipografia, header/footer, impressão)
+│   ├── style.css       # Estilos (layout responsivo, tipografia, header/footer, impressão)
+│   └── agenda.css      # Estilos da agenda
 ├── js/
-│   ├── planejador.js   # Geração e exibição do plano de estudos
+│   ├── planejador.js   # Envio dos materiais, cronograma e exibição do plano
+│   ├── agenda.js       # Agenda de provas/lições com lembretes (.ics, Google Agenda, notificações)
+│   ├── estudo.js       # Player do YouTube e chat da escola com a IA
 │   └── main.js         # Ano dinâmico no rodapé, menu mobile
+├── sw.js               # Service worker mínimo para as notificações da agenda
+├── functions/
+│   ├── _lib/
+│   │   └── gemini.js       # Chamada ao Gemini compartilhada (modelos de reserva, erros)
+│   └── api/
+│       ├── gerar-plano.js  # POST /api/gerar-plano: tópicos, resumos e perguntas a partir dos materiais
+│       └── perguntar.js    # POST /api/perguntar: chat da escola (usa agenda, plano e vídeo)
 └── README.md
 ```
 
@@ -40,26 +63,57 @@ Os genes são segmentos de DNA que carregam informações hereditárias.
 
 ## Como abrir localmente
 
-**Opção 1: direto no navegador.** Abra o arquivo `index.html` com duplo clique.
-
-**Opção 2: servidor estático.**
+**Sem IA (modo local):** abra o `index.html` com duplo clique ou use um servidor estático:
 
 ```bash
-# Python 3
-python3 -m http.server 8000
-
-# ou Node.js
-npx serve .
+python3 -m http.server 8000   # depois acesse http://localhost:8000
 ```
 
-Depois acesse <http://localhost:8000>.
+**Com IA:** é preciso Node.js e uma chave gratuita do Gemini.
+
+1. Crie a chave em <https://aistudio.google.com/apikey>.
+2. Na raiz do projeto, crie o arquivo `.dev.vars` (ele já está no `.gitignore`, então não vai para o Git):
+   ```
+   GEMINI_API_KEY=sua-chave-aqui
+   ```
+3. Rode `npx wrangler pages dev .` e acesse <http://localhost:8788>.
+
+## Publicar (Cloudflare Pages, gratuito)
+
+1. No painel da Cloudflare, vá em **Workers & Pages → Create → Pages → Connect to Git** e escolha este repositório.
+2. Configuração de build: **Framework preset** `None`, **Build command** vazio, **Build output directory** `/`.
+3. Em **Settings → Variables and Secrets**, adicione `GEMINI_API_KEY` como **Secret** (Production e Preview).
+4. Faça um novo deploy. Os arquivos em `functions/api/` viram automaticamente os endpoints `/api/gerar-plano` e `/api/perguntar`.
+
+### Alternativa: publicar pelo terminal (Wrangler)
+
+Sem conectar o Git, dá para publicar direto com um token da Cloudflare (`CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` no ambiente). Copie só os arquivos do site para uma pasta separada, para não publicar o `.dev.vars`:
+
+```bash
+mkdir -p deploy/public && cp -r index.html css js deploy/public/ && cp -r functions deploy/
+cd deploy
+npx wrangler pages project create ia-de-estudos --production-branch main   # só na primeira vez
+npx wrangler pages secret put GEMINI_API_KEY --project-name ia-de-estudos     # só na primeira vez
+npx wrangler pages deploy public --project-name ia-de-estudos --branch main
+```
+
+Variáveis opcionais:
+
+| Variável | Padrão | Uso |
+| --- | --- | --- |
+| `GEMINI_MODEL` | `gemini-3.8-flash` | Trocar o modelo (ex.: `gemini-3.5-flash-lite` para limites maiores) |
+
+**Atenção ao plano gratuito do Gemini:** ele tem limite de requisições e às vezes fica sobrecarregado. Nesses casos a função tenta automaticamente os modelos de reserva (`gemini-3.5-flash` e `gemini-3.5-flash-lite`); se todos falharem, o site mostra um aviso e volta ao modo local. Além disso, o Google pode usar o conteúdo enviado para melhorar seus produtos. Não ative cobrança no projeto da chave se quiser garantir custo zero.
 
 ## Roadmap
 
 - [x] Planejador local: data da prova, materiais, cronograma dia a dia, perguntas, vídeos e progresso
-- [ ] Integrar uma IA (modelo de linguagem) via backend/função serverless, sem expor a chave da API no navegador
-- [ ] Ler PDFs, slides e imagens dos materiais do professor
-- [ ] Gerar resumos, flashcards e questões de múltipla escolha com correção e explicação
+- [x] Integrar uma IA (Google Gemini) via função serverless, sem expor a chave no navegador
+- [x] Ler PDFs e imagens dos materiais do professor
+- [x] Gerar resumos e perguntas com resposta por tópico
+- [x] Assistir vídeos do YouTube no site com chat de dúvidas com a IA
+- [ ] Flashcards e questões de múltipla escolha com correção e explicação
+- [ ] Proteger a função contra abuso (limite por usuário, Turnstile)
 - [ ] Sugerir vídeos específicos (não só buscas no YouTube)
 - [ ] Ajustar o plano conforme o desempenho do estudante nas perguntas
 - [ ] Contas de usuário e vários planos/matérias ao mesmo tempo

@@ -27,3 +27,7 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+# Cloudflare / Wrangler
+.dev.vars
+.wrangler/
