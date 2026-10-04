@@ -16,7 +16,8 @@ export async function onRequestPost({ request, env }) {
   const senha = typeof (dados && dados.senha) === "string" ? dados.senha.slice(0, SENHA_MAX) : "";
   if (!email || !senha) return json({ erro: "Digite o e-mail e a senha." }, 400);
 
-  const chave = "entrar:" + email;
+  // Por e-mail e IP: alguém de fora errando a senha não tranca a conta do dono.
+  const chave = "entrar:" + email + ":" + (request.headers.get("CF-Connecting-IP") || "local");
   if (await bloqueado(env, chave)) return json({ erro: "Muitas tentativas. Espere 15 minutos e tente de novo." }, 429);
 
   const usuario = await lerUsuario(env, email);
