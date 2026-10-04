@@ -635,6 +635,11 @@ a {
   font-size: 1rem;
 }
 
+.chat-acoes {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .btn--pequeno {
   padding: 0.25rem 0.75rem;
   font-size: 0.85rem;

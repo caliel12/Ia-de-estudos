@@ -11,7 +11,7 @@ Feito com HTML, CSS e JavaScript puro, sem dependências nem etapa de build. A I
 1. **Escolha a data da prova**: matéria, data e quanto tempo você tem por dia.
 2. **Adicione os materiais**: cole o conteúdo, envie PDFs (slides exportados em PDF), imagens, arquivos `.txt`/`.md` ou adicione links.
 3. **Siga o plano**: um cronograma dia a dia com leitura, perguntas, vídeos, revisões espaçadas, um simulado na véspera e o progresso salvo no navegador.
-4. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site e tire dúvidas num chat com a IA, que usa os tópicos do seu plano como contexto.
+4. **Estude com vídeo**: cole um link do YouTube para assistir no próprio site e tire dúvidas num chat com a IA, que assiste ao vídeo (vídeos públicos) e usa os tópicos do seu plano como contexto. O botão "Resumir o vídeo" pede um resumo dos pontos principais.
 
 A IA lê os materiais e devolve os tópicos, com resumo, perguntas e respostas e termos de busca de vídeo. O cronograma (datas, revisões, simulado) é calculado no navegador. Se a IA não estiver disponível (por exemplo, abrindo o `index.html` direto do disco), o site usa o **modo local**, que extrai os tópicos do texto colado.
 

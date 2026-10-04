@@ -6,7 +6,9 @@
   const CHAVE_PLANO = "ia-de-estudos:plano";
   const CHAVE_VIDEO = "ia-de-estudos:video";
   const MAX_HISTORICO = 20;
-  const BOAS_VINDAS = "Oi! Abra um vídeo e me pergunte qualquer dúvida sobre a matéria. Eu uso os tópicos do seu plano para responder.";
+  const BOAS_VINDAS = "Oi! Abra um vídeo do YouTube e me pergunte o que quiser: eu assisto ao vídeo e uso os tópicos do seu plano para responder.";
+  const PEDIDO_RESUMO = "Resuma este vídeo com os pontos principais que podem cair na prova.";
+  const AVISO_SEM_VIDEO = "(Não consegui assistir a este vídeo, talvez ele seja privado ou longo demais. Respondi sem ele.)";
 
   let historico = [];
   let videoAtual = "";
@@ -70,6 +72,7 @@
     iframe.referrerPolicy = "strict-origin-when-cross-origin";
     document.getElementById("video-player").replaceChildren(iframe);
     videoAtual = `https://www.youtube.com/watch?v=${id}`;
+    document.getElementById("btn-resumir-video").hidden = false;
     try {
       localStorage.setItem(CHAVE_VIDEO, id);
     } catch (e) {}
@@ -152,7 +155,9 @@
       throw new Error("IA indisponível (abra o site por um servidor com a função /api).");
     }
     const corpo = await resposta.json().catch(() => null);
-    if (resposta.ok && corpo && corpo.resposta) return corpo.resposta;
+    if (resposta.ok && corpo && corpo.resposta) {
+      return corpo.semVideo ? `${corpo.resposta}\n\n${AVISO_SEM_VIDEO}` : corpo.resposta;
+    }
     throw new Error((corpo && corpo.erro) || "IA indisponível neste servidor.");
   }
 
@@ -170,7 +175,7 @@
 
       campoPergunta.value = "";
       adicionarMensagem("usuario", pergunta);
-      const pensando = adicionarMensagem("ia", "Pensando…", "msg--carregando");
+      const pensando = adicionarMensagem("ia", videoAtual ? "Assistindo ao vídeo e pensando…" : "Pensando…", "msg--carregando");
       botaoEnviar.disabled = true;
 
       try {
@@ -197,6 +202,10 @@
     });
 
     document.getElementById("btn-limpar-chat").addEventListener("click", limparChat);
+    document.getElementById("btn-resumir-video").addEventListener("click", () => {
+      campoPergunta.value = PEDIDO_RESUMO;
+      formChat.requestSubmit();
+    });
     document.getElementById("form-video").addEventListener("submit", (evento) => {
       evento.preventDefault();
       abrirVideo(document.getElementById("video-url").value);

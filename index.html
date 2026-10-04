@@ -140,7 +140,7 @@
       <div class="container">
         <h2>Estudar com vídeo</h2>
         <p class="section-intro">
-          Assista a uma videoaula do YouTube e tire suas dúvidas com a IA ao mesmo tempo. A IA usa os tópicos do seu plano para responder.
+          Assista a uma videoaula do YouTube e tire suas dúvidas com a IA ao mesmo tempo. A IA assiste ao vídeo junto com você e usa os tópicos do seu plano para responder.
         </p>
 
         <div class="estudo-grid">
@@ -161,7 +161,10 @@
           <div class="chat">
             <div class="chat-topo">
               <h3>Pergunte à IA</h3>
-              <button type="button" id="btn-limpar-chat" class="btn btn--secundario btn--pequeno">Limpar</button>
+              <div class="chat-acoes">
+            <button type="button" id="btn-resumir-video" class="btn btn--pequeno" hidden>Resumir o vídeo</button>
+            <button type="button" id="btn-limpar-chat" class="btn btn--secundario btn--pequeno">Limpar</button>
+          </div>
             </div>
             <div id="chat-mensagens" class="chat-mensagens" aria-live="polite"></div>
             <form id="form-chat" class="chat-form">
